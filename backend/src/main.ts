@@ -35,8 +35,8 @@ async function bootstrap() {
   // Swagger (dev only)
   if (process.env.NODE_ENV !== 'production') {
     const config = new DocumentBuilder()
-      .setTitle('Mini E-Commerce API')
-      .setDescription('NestJS REST API for e-commerce storefront + admin panel')
+      .setTitle('OmniShop API')
+      .setDescription('NestJS REST API for OmniShop storefront + admin panel')
       .setVersion('1.0')
       .addBearerAuth()
       .build();

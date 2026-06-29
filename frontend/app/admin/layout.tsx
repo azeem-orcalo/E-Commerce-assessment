@@ -28,6 +28,7 @@ import LocalOfferIcon from '@mui/icons-material/LocalOffer';
 import CategoryIcon from '@mui/icons-material/Category';
 import LogoutIcon from '@mui/icons-material/Logout';
 import StorefrontIcon from '@mui/icons-material/Storefront';
+import ContactMailIcon from '@mui/icons-material/ContactMail';
 import { getStoredUser, setAccessToken, setStoredUser, api } from '@/lib/api';
 
 const ACCENT = '#f7444e';
@@ -56,6 +57,7 @@ const navItems = [
   { label: 'Orders', href: '/admin/orders', icon: <ShoppingBagIcon fontSize="small" /> },
   { label: 'Offers', href: '/admin/offers', icon: <LocalOfferIcon fontSize="small" /> },
   { label: 'Customers', href: '/admin/customers', icon: <PeopleIcon fontSize="small" /> },
+  { label: 'Contact Queries', href: '/admin/contact', icon: <ContactMailIcon fontSize="small" /> },
 ];
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
@@ -118,7 +120,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           <Box sx={{ px: 3, py: 3.5, borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
             <Link href="/" style={{ textDecoration: 'none' }}>
               <Typography variant="h6" sx={{ fontWeight: 800, letterSpacing: '0.05em', color: '#fff', lineHeight: 1 }}>
-                Bin<Box component="span" sx={{ color: ACCENT }}>Azeem</Box>
+                Omni<Box component="span" sx={{ color: ACCENT }}>Shop</Box>
               </Typography>
             </Link>
             <Typography sx={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.4)', mt: 0.5, fontWeight: 500, letterSpacing: '0.1em', textTransform: 'uppercase' }}>

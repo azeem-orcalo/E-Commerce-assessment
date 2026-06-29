@@ -122,7 +122,7 @@ export default function AboutPage() {
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src="https://images.unsplash.com/photo-1441984904996-e0b6ba687e04?w=1800&h=700&fit=crop&q=85"
-          alt="About BinAzeem"
+          alt="About OmniShop"
           style={{
             position: 'absolute', inset: 0,
             width: '100%', height: '100%',
@@ -256,7 +256,7 @@ export default function AboutPage() {
               </Typography>
 
               <Typography sx={{ color: '#4b5563', lineHeight: 1.95, fontSize: '1rem', mb: 2.5 }}>
-                BinAzeem started as a small side project born out of frustration with cluttered,
+                OmniShop started as a small side project born out of frustration with cluttered,
                 slow, and hard-to-navigate online stores. We believed shopping should feel
                 effortless — so we built the store we always wanted to use.
               </Typography>
@@ -498,7 +498,7 @@ export default function AboutPage() {
           <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr', md: '2fr 1fr 1fr 2fr' }, gap: 5 }}>
             <Box>
               <Typography variant="h5" sx={{ fontWeight: 800, letterSpacing: '0.06em', mb: 2 }}>
-                Bin<Box component="span" sx={{ color: ACCENT }}>Azeem</Box>
+                Omni<Box component="span" sx={{ color: ACCENT }}>Shop</Box>
               </Typography>
               <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.5)', maxWidth: 290, lineHeight: 1.9 }}>
                 Premium clothing for the modern wardrobe. Quality craftsmanship, timeless design — built around you.
@@ -545,7 +545,7 @@ export default function AboutPage() {
 
           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 2 }}>
             <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.3)', fontSize: '0.8rem' }}>
-              © 2026 BinAzeem Fashion. All rights reserved.
+              © 2026 OmniShop Fashion. All rights reserved.
             </Typography>
             <Box sx={{ display: 'flex', gap: 3 }}>
               {['Privacy Policy', 'Terms of Service', 'Cookies'].map((l) => (

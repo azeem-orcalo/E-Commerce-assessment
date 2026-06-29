@@ -25,8 +25,8 @@ async function bootstrap() {
     }));
     if (process.env.NODE_ENV !== 'production') {
         const config = new swagger_1.DocumentBuilder()
-            .setTitle('Mini E-Commerce API')
-            .setDescription('NestJS REST API for e-commerce storefront + admin panel')
+            .setTitle('OmniShop API')
+            .setDescription('NestJS REST API for OmniShop storefront + admin panel')
             .setVersion('1.0')
             .addBearerAuth()
             .build();

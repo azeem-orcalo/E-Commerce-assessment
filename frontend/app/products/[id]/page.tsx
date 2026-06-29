@@ -32,6 +32,7 @@ import { authApi, productsApi, reviewsApi, setAccessToken, getStoredUser, setSto
 import Navbar from '@/components/Navbar';
 import { useFavorites } from '@/lib/useFavorites';
 import { useCart } from '@/lib/CartContext';
+import SuggestionsRow from '@/components/SuggestionsRow';
 
 const theme = createTheme({
   palette: {
@@ -47,8 +48,60 @@ const ACCENT = '#f7444e';
 const NAVY = '#002c3e';
 const PLACEHOLDER_IMG = 'https://placehold.co/800x1000/f5f6f8/9ca3af?text=No+Image';
 
-const STATIC_COLORS = ['#1a1a2e', '#ffffff', '#f7444e', '#d1d5db'];
+const FALLBACK_COLORS = ['#1a1a2e', '#ffffff', '#f7444e', '#d1d5db'];
 const STATIC_SIZES = ['XS', 'S', 'M', 'L', 'XL', 'XXL'];
+
+async function extractDominantColors(imageUrl: string, count = 5): Promise<string[]> {
+  return new Promise((resolve) => {
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+    img.onload = () => {
+      try {
+        const canvas = document.createElement('canvas');
+        canvas.width = 80;
+        canvas.height = 80;
+        const ctx = canvas.getContext('2d');
+        if (!ctx) { resolve(FALLBACK_COLORS); return; }
+        ctx.drawImage(img, 0, 0, 80, 80);
+        const { data } = ctx.getImageData(0, 0, 80, 80);
+        const freq = new Map<string, { r: number; g: number; b: number; n: number }>();
+        for (let i = 0; i < data.length; i += 4) {
+          if (data[i + 3] < 128) continue;
+          // round to nearest 24 to bucket similar shades
+          const r = Math.round(data[i] / 24) * 24;
+          const g = Math.round(data[i + 1] / 24) * 24;
+          const b = Math.round(data[i + 2] / 24) * 24;
+          const key = `${r},${g},${b}`;
+          const entry = freq.get(key);
+          if (entry) entry.n++;
+          else freq.set(key, { r, g, b, n: 1 });
+        }
+        const sorted = [...freq.values()].sort((a, b) => b.n - a.n);
+        const picked: Array<{ r: number; g: number; b: number }> = [];
+        for (const c of sorted) {
+          // skip near-white and near-black noise unless they're the very top
+          const lum = 0.299 * c.r + 0.587 * c.g + 0.114 * c.b;
+          if (picked.length > 0 && (lum > 230 || lum < 18)) continue;
+          const tooClose = picked.some((p) => Math.abs(p.r - c.r) + Math.abs(p.g - c.g) + Math.abs(p.b - c.b) < 90);
+          if (!tooClose) picked.push(c);
+          if (picked.length >= count) break;
+        }
+        const hex = picked.map(({ r, g, b }) =>
+          `#${r.toString(16).padStart(2, '0')}${g.toString(16).padStart(2, '0')}${b.toString(16).padStart(2, '0')}`
+        );
+        resolve(hex.length >= 2 ? hex : FALLBACK_COLORS);
+      } catch {
+        resolve(FALLBACK_COLORS);
+      }
+    };
+    img.onerror = () => resolve(FALLBACK_COLORS);
+    img.src = imageUrl;
+  });
+}
+
+const SIZE_CATEGORY_KEYWORDS = ['cloth', 'wear', 'shoe', 'bag'];
+const showsSizes = (categoryName: string) =>
+  SIZE_CATEGORY_KEYWORDS.some((kw) => categoryName.toLowerCase().includes(kw));
 
 export default function ProductDetailPage() {
   const params = useParams();
@@ -61,6 +114,7 @@ export default function ProductDetailPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
 
+  const [imageColors, setImageColors] = useState<string[]>(FALLBACK_COLORS);
   const [selectedSize, setSelectedSize] = useState<string | null>(null);
   const [selectedColor, setSelectedColor] = useState<string | null>(null);
   const [quantity, setQuantity] = useState(1);
@@ -112,6 +166,12 @@ export default function ProductDetailPage() {
       .then((res) => {
         const p = res.data as ApiProduct;
         setProduct(p);
+        // Extract dominant colors from the product image
+        const imgUrl = p.imageUrl ?? PLACEHOLDER_IMG;
+        extractDominantColors(imgUrl).then((colors) => {
+          setImageColors(colors);
+          setSelectedColor(null);
+        });
         setReviewsLoading(true);
         reviewsApi.findByProduct(id)
           .then((r) => setReviews(r.data))
@@ -199,7 +259,7 @@ export default function ProductDetailPage() {
           pb: { xs: '50px', md: '70px' },
           display: 'flex',
           alignItems: 'center',
-          clipPath: 'polygon(0 0, 100% 0, 100% 82%, 50% 100%, 0 82%)',
+          clipPath: 'polygon(0 0, 100% 0, 100% 92%, 0 100%)',
           overflow: 'hidden',
         }}
       >
@@ -365,16 +425,23 @@ export default function ProductDetailPage() {
 
               <Divider sx={{ borderColor: 'rgba(0,0,0,0.07)', mb: 3.5 }} />
 
-              {/* Colour selector */}
+              {/* Colour selector — derived from product image */}
               <Box sx={{ mb: 3.5 }}>
                 <Typography sx={{ fontWeight: 700, color: NAVY, fontSize: '0.88rem', mb: 1.5, textTransform: 'uppercase', letterSpacing: '0.08em' }}>
-                  Colour {selectedColor && <Box component="span" sx={{ color: ACCENT, textTransform: 'none', fontWeight: 600, letterSpacing: 0 }}>— selected</Box>}
+                  Colour
+                  {selectedColor && (
+                    <Box component="span" sx={{ ml: 1, display: 'inline-flex', alignItems: 'center', gap: 0.6, textTransform: 'none', fontWeight: 600, letterSpacing: 0, color: ACCENT }}>
+                      <Box component="span" sx={{ width: 12, height: 12, borderRadius: '50%', bgcolor: selectedColor, border: '1.5px solid rgba(0,0,0,0.12)', display: 'inline-block', verticalAlign: 'middle' }} />
+                      {selectedColor}
+                    </Box>
+                  )}
                 </Typography>
-                <Box sx={{ display: 'flex', gap: 1.5 }}>
-                  {STATIC_COLORS.map((color) => (
+                <Box sx={{ display: 'flex', gap: 1.5, flexWrap: 'wrap' }}>
+                  {imageColors.map((color) => (
                     <Box
                       key={color}
-                      onClick={() => setSelectedColor(color)}
+                      onClick={() => setSelectedColor(selectedColor === color ? null : color)}
+                      title={color}
                       sx={{
                         width: 36, height: 36, borderRadius: '50%', bgcolor: color,
                         border: selectedColor === color ? `3px solid ${ACCENT}` : '3px solid transparent',
@@ -390,36 +457,35 @@ export default function ProductDetailPage() {
                 </Box>
               </Box>
 
-              {/* Size selector */}
-              <Box sx={{ mb: 3.5 }}>
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1.5 }}>
-                  <Typography sx={{ fontWeight: 700, color: NAVY, fontSize: '0.88rem', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
-                    Size {selectedSize && <Box component="span" sx={{ color: ACCENT, textTransform: 'none', fontWeight: 600, letterSpacing: 0 }}>— {selectedSize}</Box>}
-                  </Typography>
-                  <Typography sx={{ fontSize: '0.8rem', color: ACCENT, fontWeight: 600, cursor: 'pointer', '&:hover': { textDecoration: 'underline' } }}>
-                    Size guide →
-                  </Typography>
+              {/* Size selector — only for clothing, shoes, bags */}
+              {showsSizes(product.category.name) && (
+                <Box sx={{ mb: 3.5 }}>
+                  <Box sx={{ mb: 1.5 }}>
+                    <Typography sx={{ fontWeight: 700, color: NAVY, fontSize: '0.88rem', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
+                      Size {selectedSize && <Box component="span" sx={{ color: ACCENT, textTransform: 'none', fontWeight: 600, letterSpacing: 0 }}>— {selectedSize}</Box>}
+                    </Typography>
+                  </Box>
+                  <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
+                    {STATIC_SIZES.map((size) => (
+                      <Box
+                        key={size}
+                        onClick={() => setSelectedSize(size)}
+                        sx={{
+                          minWidth: 48, height: 48, display: 'flex', alignItems: 'center', justifyContent: 'center', px: 1.5,
+                          border: selectedSize === size ? `2px solid ${ACCENT}` : '2px solid #e5e7eb',
+                          borderRadius: '10px', fontSize: '0.88rem', fontWeight: 700,
+                          color: selectedSize === size ? ACCENT : '#374151',
+                          bgcolor: selectedSize === size ? 'rgba(247,68,78,0.06)' : '#fff',
+                          cursor: 'pointer', transition: 'all 0.18s',
+                          '&:hover': { borderColor: ACCENT, color: ACCENT, bgcolor: 'rgba(247,68,78,0.04)' },
+                        }}
+                      >
+                        {size}
+                      </Box>
+                    ))}
+                  </Box>
                 </Box>
-                <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
-                  {STATIC_SIZES.map((size) => (
-                    <Box
-                      key={size}
-                      onClick={() => setSelectedSize(size)}
-                      sx={{
-                        minWidth: 48, height: 48, display: 'flex', alignItems: 'center', justifyContent: 'center', px: 1.5,
-                        border: selectedSize === size ? `2px solid ${ACCENT}` : '2px solid #e5e7eb',
-                        borderRadius: '10px', fontSize: '0.88rem', fontWeight: 700,
-                        color: selectedSize === size ? ACCENT : '#374151',
-                        bgcolor: selectedSize === size ? 'rgba(247,68,78,0.06)' : '#fff',
-                        cursor: 'pointer', transition: 'all 0.18s',
-                        '&:hover': { borderColor: ACCENT, color: ACCENT, bgcolor: 'rgba(247,68,78,0.04)' },
-                      }}
-                    >
-                      {size}
-                    </Box>
-                  ))}
-                </Box>
-              </Box>
+              )}
 
               {/* Quantity */}
               <Box sx={{ mb: 4 }}>
@@ -679,7 +745,7 @@ export default function ProductDetailPage() {
           <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr', md: '2fr 1fr 1fr 2fr' }, gap: 5 }}>
             <Box>
               <Typography variant="h5" sx={{ fontWeight: 800, letterSpacing: '0.06em', mb: 2 }}>
-                Bin<Box component="span" sx={{ color: ACCENT }}>Azeem</Box>
+                Omni<Box component="span" sx={{ color: ACCENT }}>Shop</Box>
               </Typography>
               <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.5)', maxWidth: 290, lineHeight: 1.9 }}>
                 Premium clothing for the modern wardrobe. Quality craftsmanship, timeless design — built around you.
@@ -713,7 +779,7 @@ export default function ProductDetailPage() {
 
           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 2 }}>
             <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.3)', fontSize: '0.8rem' }}>
-              © 2026 BinAzeem Fashion. All rights reserved.
+              © 2026 OmniShop. All rights reserved.
             </Typography>
             <Box sx={{ display: 'flex', gap: 3 }}>
               {['Privacy Policy', 'Terms of Service', 'Cookies'].map((l) => (
@@ -723,6 +789,15 @@ export default function ProductDetailPage() {
           </Box>
         </Container>
       </Box>
+
+      {/* ─── SUGGESTIONS ROW ─── */}
+      <SuggestionsRow
+        userId={currentUser?.id ?? null}
+        excludeId={id}
+        title="You Might Also Like"
+        subtitle={currentUser ? 'Based on your purchase history' : 'Trending in our store'}
+        onLoginRequired={() => setAuthModal('login')}
+      />
 
       <AuthModals
         mode={authModal}

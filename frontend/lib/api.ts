@@ -349,6 +349,17 @@ export const offersApi = {
   active: () => api.get<Offer[]>('/offers'),
 };
 
+// ─── Suggestions ─────────────────────────────────────────────────────────────
+
+export const suggestionsApi = {
+  /** Personalised suggestions for the logged-in user (category-affinity). */
+  forUser: (limit = 8) =>
+    api.get<ApiProduct[]>('/suggestions', { params: { limit } }),
+  /** Global bestsellers — no auth required. */
+  popular: (limit = 8) =>
+    api.get<ApiProduct[]>('/suggestions/popular', { params: { limit } }),
+};
+
 // ─── Admin Users ─────────────────────────────────────────────────────────────
 
 export interface AdminUser {
@@ -375,6 +386,40 @@ export const adminUsersApi = {
     api.patch<AdminUser>(`/admin/users/${id}`, data),
   delete: (id: string) =>
     api.delete(`/admin/users/${id}`),
+};
+
+// ─── Contact ─────────────────────────────────────────────────────────────────
+
+export type ContactStatus = 'UNREAD' | 'READ' | 'RESOLVED';
+
+export interface ContactQuery {
+  id: string;
+  name: string;
+  email: string;
+  subject: string;
+  message: string;
+  status: ContactStatus;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CreateContactPayload {
+  name: string;
+  email: string;
+  subject: string;
+  message: string;
+}
+
+export const contactApi = {
+  /** Public — submit a contact query */
+  submit: (payload: CreateContactPayload) =>
+    api.post<ContactQuery>('/contact', payload),
+  /** Admin — list all contact queries */
+  list: () =>
+    api.get<ContactQuery[]>('/contact'),
+  /** Admin — update read/resolved status */
+  updateStatus: (id: string, status: ContactStatus) =>
+    api.patch<ContactQuery>(`/contact/${id}/status`, { status }),
 };
 
 // ─── Utilities ───────────────────────────────────────────────────────────────

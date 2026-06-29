@@ -3,7 +3,7 @@ import './globals.css';
 import ClientProvider from './ClientProvider';
 
 export const metadata: Metadata = {
-  title: 'BinAzeem — Premium Fashion',
+  title: 'OmniShop — Premium Fashion',
   description: 'Premium clothing for the modern wardrobe.',
 };
 

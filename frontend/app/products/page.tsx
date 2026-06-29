@@ -312,54 +312,44 @@ export default function ProductsPage() {
               />
             </Box>
 
-            {/* Category chips */}
-            <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', flex: 1 }}>
-              {/* Favorites filter chip */}
-              <Chip
-                icon={<FavoriteIcon sx={{ fontSize: '14px !important', color: showFavoritesOnly ? '#fff' : ACCENT }} />}
-                label={favorites.length > 0 ? `Favorites (${favorites.length})` : 'Favorites'}
-                onClick={() => setShowFavoritesOnly((v) => !v)}
+            {/* Favorites chip */}
+            <Chip
+              icon={<FavoriteIcon sx={{ fontSize: '14px !important', color: showFavoritesOnly ? '#fff' : ACCENT }} />}
+              label={favorites.length > 0 ? `Favorites (${favorites.length})` : 'Favorites'}
+              onClick={() => setShowFavoritesOnly((v) => !v)}
+              sx={{
+                fontWeight: 700, fontSize: '0.82rem',
+                bgcolor: showFavoritesOnly ? ACCENT : '#fff0f0',
+                color: showFavoritesOnly ? '#fff' : ACCENT,
+                border: `1.5px solid ${ACCENT}`,
+                transition: 'all 0.18s',
+                '& .MuiChip-icon': { ml: 0.8 },
+                '&:hover': { bgcolor: showFavoritesOnly ? '#e03038' : '#fee2e2' },
+                cursor: 'pointer',
+                flexShrink: 0,
+              }}
+            />
+
+            {/* Category dropdown */}
+            <FormControl size="small" sx={{ minWidth: 160 }}>
+              <Select
+                value={selectedCategoryId}
+                onChange={(e) => { handleCategorySelect(e.target.value); setShowFavoritesOnly(false); }}
+                displayEmpty
                 sx={{
-                  fontWeight: 700, fontSize: '0.82rem',
-                  bgcolor: showFavoritesOnly ? ACCENT : '#fff0f0',
-                  color: showFavoritesOnly ? '#fff' : ACCENT,
-                  border: `1.5px solid ${ACCENT}`,
-                  transition: 'all 0.18s',
-                  '& .MuiChip-icon': { ml: 0.8 },
-                  '&:hover': { bgcolor: showFavoritesOnly ? '#e03038' : '#fee2e2' },
-                  cursor: 'pointer',
+                  fontSize: '0.88rem', fontWeight: 600, color: selectedCategoryId ? ACCENT : NAVY,
+                  bgcolor: selectedCategoryId ? 'rgba(247,68,78,0.06)' : '#f5f6f8', borderRadius: '10px',
+                  '& .MuiOutlinedInput-notchedOutline': { borderColor: selectedCategoryId ? ACCENT : '#e5e7eb' },
+                  '&:hover .MuiOutlinedInput-notchedOutline': { borderColor: ACCENT },
+                  '&.Mui-focused .MuiOutlinedInput-notchedOutline': { borderColor: ACCENT },
                 }}
-              />
-              <Chip
-                label="All"
-                onClick={() => { handleCategorySelect(''); setShowFavoritesOnly(false); }}
-                sx={{
-                  fontWeight: 600, fontSize: '0.82rem',
-                  bgcolor: !showFavoritesOnly && selectedCategoryId === '' ? ACCENT : '#f5f6f8',
-                  color: !showFavoritesOnly && selectedCategoryId === '' ? '#fff' : '#4b5563',
-                  border: !showFavoritesOnly && selectedCategoryId === '' ? `1.5px solid ${ACCENT}` : '1.5px solid #e5e7eb',
-                  transition: 'all 0.18s',
-                  '&:hover': { bgcolor: !showFavoritesOnly && selectedCategoryId === '' ? '#e03038' : '#ffe5e6', borderColor: ACCENT, color: !showFavoritesOnly && selectedCategoryId === '' ? '#fff' : ACCENT },
-                  cursor: 'pointer',
-                }}
-              />
-              {categories.map((cat) => (
-                <Chip
-                  key={cat.id}
-                  label={cat.name}
-                  onClick={() => handleCategorySelect(cat.id)}
-                  sx={{
-                    fontWeight: 600, fontSize: '0.82rem',
-                    bgcolor: selectedCategoryId === cat.id ? ACCENT : '#f5f6f8',
-                    color: selectedCategoryId === cat.id ? '#fff' : '#4b5563',
-                    border: selectedCategoryId === cat.id ? `1.5px solid ${ACCENT}` : '1.5px solid #e5e7eb',
-                    transition: 'all 0.18s',
-                    '&:hover': { bgcolor: selectedCategoryId === cat.id ? '#e03038' : '#ffe5e6', borderColor: ACCENT, color: selectedCategoryId === cat.id ? '#fff' : ACCENT },
-                    cursor: 'pointer',
-                  }}
-                />
-              ))}
-            </Box>
+              >
+                <MenuItem value="">All Categories</MenuItem>
+                {categories.map((cat) => (
+                  <MenuItem key={cat.id} value={cat.id}>{cat.name}</MenuItem>
+                ))}
+              </Select>
+            </FormControl>
 
             {/* Sort */}
             <FormControl size="small" sx={{ minWidth: 160 }}>
@@ -380,26 +370,6 @@ export default function ProductsPage() {
                 <MenuItem value="price-asc">Price: Low → High</MenuItem>
                 <MenuItem value="price-desc">Price: High → Low</MenuItem>
                 <MenuItem value="rating">Best Sellers</MenuItem>
-              </Select>
-            </FormControl>
-
-            {/* Per-page selector */}
-            <FormControl size="small" sx={{ minWidth: 110 }}>
-              <Select
-                value={limit}
-                onChange={(e) => handleLimitChange(e.target.value as number)}
-                displayEmpty
-                sx={{
-                  fontSize: '0.88rem', fontWeight: 600, color: NAVY,
-                  bgcolor: '#f5f6f8', borderRadius: '10px',
-                  '& .MuiOutlinedInput-notchedOutline': { borderColor: '#e5e7eb' },
-                  '&:hover .MuiOutlinedInput-notchedOutline': { borderColor: ACCENT },
-                  '&.Mui-focused .MuiOutlinedInput-notchedOutline': { borderColor: ACCENT },
-                }}
-              >
-                {[12, 24, 48].map((n) => (
-                  <MenuItem key={n} value={n}>{n} / page</MenuItem>
-                ))}
               </Select>
             </FormControl>
 
@@ -783,9 +753,32 @@ export default function ProductsPage() {
             </Box>
           )}
 
-          {/* ─── PAGINATION ─── */}
+          {/* ─── PAGINATION + PER-PAGE ─── */}
+          {!loading && !showFavoritesOnly && (
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 6, flexWrap: 'wrap', gap: 2 }}>
+              {/* Per-page selector */}
+              <FormControl size="small" sx={{ minWidth: 110 }}>
+                <Select
+                  value={limit}
+                  onChange={(e) => handleLimitChange(e.target.value as number)}
+                  displayEmpty
+                  sx={{
+                    fontSize: '0.88rem', fontWeight: 600, color: NAVY,
+                    bgcolor: '#f5f6f8', borderRadius: '10px',
+                    '& .MuiOutlinedInput-notchedOutline': { borderColor: '#e5e7eb' },
+                    '&:hover .MuiOutlinedInput-notchedOutline': { borderColor: ACCENT },
+                    '&.Mui-focused .MuiOutlinedInput-notchedOutline': { borderColor: ACCENT },
+                  }}
+                >
+                  {[12, 24, 48].map((n) => (
+                    <MenuItem key={n} value={n}>{n} / page</MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            </Box>
+          )}
           {!loading && !showFavoritesOnly && meta.totalPages > 1 && (
-            <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 1, mt: 6 }}>
+            <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 1, mt: 2 }}>
               <IconButton
                 disabled={page === 1}
                 onClick={() => setPage((p) => p - 1)}
@@ -853,7 +846,7 @@ export default function ProductsPage() {
           <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr', md: '2fr 1fr 1fr 2fr' }, gap: 5 }}>
             <Box>
               <Typography variant="h5" sx={{ fontWeight: 800, letterSpacing: '0.06em', mb: 2 }}>
-                Bin<Box component="span" sx={{ color: ACCENT }}>Azeem</Box>
+                Omni<Box component="span" sx={{ color: ACCENT }}>Shop</Box>
               </Typography>
               <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.5)', maxWidth: 290, lineHeight: 1.9 }}>
                 Premium clothing for the modern wardrobe. Quality craftsmanship, timeless design — built around you.
@@ -887,7 +880,7 @@ export default function ProductsPage() {
 
           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 2 }}>
             <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.3)', fontSize: '0.8rem' }}>
-              © 2026 BinAzeem Fashion. All rights reserved.
+              © 2026 OmniShop. All rights reserved.
             </Typography>
             <Box sx={{ display: 'flex', gap: 3 }}>
               {['Privacy Policy', 'Terms of Service', 'Cookies'].map((l) => (

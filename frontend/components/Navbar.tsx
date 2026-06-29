@@ -24,11 +24,12 @@ const ACCENT = '#f7444e';
 const NAVY = '#002c3e';
 
 const NAV_ITEMS = [
-  { label: 'Home',      href: '/' },
-  { label: 'Products',  href: '/products' },
-  { label: 'Offers',    href: '/offers' },
-  { label: 'About',     href: '/about' },
-  { label: 'My Orders', href: '/orders' },
+  { label: 'Home',       href: '/' },
+  { label: 'Products',   href: '/products' },
+  { label: 'Offers',     href: '/offers' },
+  { label: 'About',      href: '/about' },
+  { label: 'Contact Us', href: '/contact' },
+  { label: 'My Orders',  href: '/orders' },
 ];
 
 interface NavbarProps {
@@ -82,7 +83,7 @@ export default function Navbar({ currentUser, onSignIn, onSignUp, onLogout }: Na
               variant="h5"
               sx={{ fontWeight: 800, letterSpacing: '0.06em', color: '#fff', cursor: 'pointer' }}
             >
-              Bin<Box component="span" sx={{ color: ACCENT }}>Azeem</Box>
+              Omni<Box component="span" sx={{ color: ACCENT }}>Shop</Box>
             </Typography>
           </Link>
 

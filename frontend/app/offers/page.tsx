@@ -16,6 +16,7 @@ import {
   Skeleton,
   Alert,
   Button,
+  Divider,
 } from '@mui/material';
 import LocalOfferIcon from '@mui/icons-material/LocalOffer';
 import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
@@ -494,6 +495,96 @@ export default function OffersPage() {
             </Box>
           )}
         </Container>
+
+        {/* ─────────────── FOOTER ─────────────── */}
+        <Box sx={{ bgcolor: NAVY, color: '#fff', pt: 8, pb: 4 }}>
+          <Container maxWidth="xl">
+            <Box
+              sx={{
+                display: 'grid',
+                gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr', md: '2fr 1fr 1fr 2fr' },
+                gap: 5,
+              }}
+            >
+              {/* Brand */}
+              <Box>
+                <Typography variant="h5" sx={{ fontWeight: 800, letterSpacing: '0.06em', mb: 2 }}>
+                  Omni<Box component="span" sx={{ color: ACCENT }}>Shop</Box>
+                </Typography>
+                <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.5)', maxWidth: 290, lineHeight: 1.9 }}>
+                  Premium clothing for the modern wardrobe. Quality craftsmanship, timeless design — built around you.
+                </Typography>
+              </Box>
+
+              {/* Shop */}
+              <Box>
+                <Typography variant="subtitle2" sx={{ fontWeight: 700, mb: 2.5, textTransform: 'uppercase', letterSpacing: '0.12em', fontSize: '0.75rem', color: 'rgba(255,255,255,0.7)' }}>
+                  Shop
+                </Typography>
+                {['New Arrivals', 'Tops', 'Bottoms', 'Dresses', 'Outerwear'].map((l) => (
+                  <Typography key={l} variant="body2" sx={{ color: 'rgba(255,255,255,0.45)', mb: 1.2, cursor: 'pointer', transition: 'color 0.2s', '&:hover': { color: ACCENT } }}>
+                    {l}
+                  </Typography>
+                ))}
+              </Box>
+
+              {/* Help */}
+              <Box>
+                <Typography variant="subtitle2" sx={{ fontWeight: 700, mb: 2.5, textTransform: 'uppercase', letterSpacing: '0.12em', fontSize: '0.75rem', color: 'rgba(255,255,255,0.7)' }}>
+                  Help
+                </Typography>
+                {['FAQ', 'Shipping Info', 'Returns', 'Contact Us', 'Size Guide'].map((l) => (
+                  <Typography key={l} variant="body2" sx={{ color: 'rgba(255,255,255,0.45)', mb: 1.2, cursor: 'pointer', transition: 'color 0.2s', '&:hover': { color: ACCENT } }}>
+                    {l}
+                  </Typography>
+                ))}
+              </Box>
+
+              {/* Newsletter */}
+              <Box>
+                <Typography variant="subtitle2" sx={{ fontWeight: 700, mb: 1.5, textTransform: 'uppercase', letterSpacing: '0.12em', fontSize: '0.75rem', color: 'rgba(255,255,255,0.7)' }}>
+                  Newsletter
+                </Typography>
+                <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.5)', mb: 2.5, lineHeight: 1.7 }}>
+                  Subscribe for special offers, style guides, and new arrivals straight to your inbox.
+                </Typography>
+                <Box sx={{ display: 'flex', gap: 1 }}>
+                  <Box
+                    component="input"
+                    placeholder="Your email address"
+                    sx={{
+                      flex: 1, px: 2, py: 1.4,
+                      bgcolor: 'rgba(255,255,255,0.08)',
+                      border: '1px solid rgba(255,255,255,0.15)',
+                      color: '#fff', fontSize: '0.875rem', outline: 'none', borderRadius: '6px',
+                      transition: 'border-color 0.2s',
+                      '&::placeholder': { color: 'rgba(255,255,255,0.35)' },
+                      '&:focus': { borderColor: ACCENT },
+                    }}
+                  />
+                  <Button variant="contained" color="primary" sx={{ fontWeight: 700, textTransform: 'none', px: 2.5, borderRadius: '6px', whiteSpace: 'nowrap' }}>
+                    Subscribe
+                  </Button>
+                </Box>
+              </Box>
+            </Box>
+
+            <Divider sx={{ borderColor: 'rgba(255,255,255,0.08)', mt: 6, mb: 3.5 }} />
+
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 2 }}>
+              <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.3)', fontSize: '0.8rem' }}>
+                © 2026 OmniShop. All rights reserved.
+              </Typography>
+              <Box sx={{ display: 'flex', gap: 3 }}>
+                {['Privacy Policy', 'Terms of Service', 'Cookies'].map((l) => (
+                  <Typography key={l} variant="body2" sx={{ color: 'rgba(255,255,255,0.3)', fontSize: '0.8rem', cursor: 'pointer', '&:hover': { color: ACCENT }, transition: 'color 0.2s' }}>
+                    {l}
+                  </Typography>
+                ))}
+              </Box>
+            </Box>
+          </Container>
+        </Box>
 
         <AuthModals
           mode={authModal}

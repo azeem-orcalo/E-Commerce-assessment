@@ -21,6 +21,8 @@ const orders_module_1 = require("./orders/orders.module");
 const admin_module_1 = require("./admin/admin.module");
 const reviews_module_1 = require("./reviews/reviews.module");
 const offers_module_1 = require("./offers/offers.module");
+const suggestions_module_1 = require("./suggestions/suggestions.module");
+const contact_module_1 = require("./contact/contact.module");
 const jwt_auth_guard_1 = require("./auth/guards/jwt-auth.guard");
 const roles_guard_1 = require("./auth/guards/roles.guard");
 let AppModule = class AppModule {
@@ -41,6 +43,8 @@ exports.AppModule = AppModule = __decorate([
             admin_module_1.AdminModule,
             reviews_module_1.ReviewsModule,
             offers_module_1.OffersModule,
+            suggestions_module_1.SuggestionsModule,
+            contact_module_1.ContactModule,
         ],
         providers: [
             { provide: core_1.APP_GUARD, useClass: jwt_auth_guard_1.JwtAuthGuard },

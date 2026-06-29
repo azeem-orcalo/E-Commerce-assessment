@@ -12,6 +12,8 @@ import { OrdersModule } from './orders/orders.module';
 import { AdminModule } from './admin/admin.module';
 import { ReviewsModule } from './reviews/reviews.module';
 import { OffersModule } from './offers/offers.module';
+import { SuggestionsModule } from './suggestions/suggestions.module';
+import { ContactModule } from './contact/contact.module';
 import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
 import { RolesGuard } from './auth/guards/roles.guard';
 
@@ -29,6 +31,8 @@ import { RolesGuard } from './auth/guards/roles.guard';
     AdminModule,
     ReviewsModule,
     OffersModule,
+    SuggestionsModule,
+    ContactModule,
   ],
   providers: [
     // Guard order matters: JWT validates identity first, Roles checks authorization second

@@ -124,7 +124,7 @@ function LeftPanel() {
       {/* Top: brand + copy */}
       <Box sx={{ position: 'relative', zIndex: 1 }}>
         <Typography sx={{ fontWeight: 800, fontSize: '1.5rem', color: '#fff', letterSpacing: '0.06em', mb: 3 }}>
-          Bin<Box component="span" sx={{ color: ACCENT }}>Azeem</Box>
+          Omni<Box component="span" sx={{ color: ACCENT }}>Shop</Box>
         </Typography>
         <Typography
           sx={{ color: 'rgba(255,255,255,0.55)', lineHeight: 1.85, fontSize: '0.875rem', mb: 4 }}
@@ -752,6 +752,12 @@ export default function AuthModals({ mode, onClose, onSwitch, onSuccess }: AuthM
             width: '100%',
             maxWidth: { xs: '100%', md: 800 },
             maxHeight: '95vh',
+          },
+        },
+        backdrop: {
+          sx: {
+            backgroundColor: 'rgba(0, 0, 0, 0.55)',
+            backdropFilter: 'blur(4px)',
           },
         },
       }}
