@@ -17,7 +17,7 @@ import type { TransitionProps } from '@mui/material/transitions';
 import CloseIcon from '@mui/icons-material/Close';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
-import { authApi, setAccessToken, extractApiError, type RegisterPayload } from '@/lib/api';
+import { authApi, setAccessToken, setStoredUser, extractApiError, type RegisterPayload } from '@/lib/api';
 
 const ACCENT = '#f7444e';
 const NAVY = '#002c3e';
@@ -179,7 +179,7 @@ function validateLogin(f: LoginFields): LoginErrors {
   return e;
 }
 
-function LoginForm({ onSwitch, onClose }: { onSwitch: () => void; onClose: () => void }) {
+function LoginForm({ onSwitch, onClose, onSuccess }: { onSwitch: () => void; onClose: () => void; onSuccess?: (u: AuthUser) => void }) {
   const router = useRouter();
   const [form, setForm] = useState<LoginFields>({ email: '', password: '' });
   const [errors, setErrors] = useState<LoginErrors>({});
@@ -203,10 +203,15 @@ function LoginForm({ onSwitch, onClose }: { onSwitch: () => void; onClose: () =>
     setErrors({});
     try {
       const { data } = await authApi.login(form);
-      setAccessToken(data.data.accessToken);
+      setAccessToken(data.accessToken);
+      setStoredUser(data.user);
       onClose();
-      router.push(data.data.user.role === 'ADMIN' ? '/admin' : '/');
-      router.refresh();
+      if (onSuccess) {
+        onSuccess(data.user);
+      } else {
+        router.push(data.user.role === 'ADMIN' ? '/admin' : '/');
+        router.refresh();
+      }
     } catch (err) {
       setErrors({ global: extractApiError(err) });
     } finally {
@@ -429,7 +434,7 @@ function validateSignup(f: SignupFields): SignupErrors {
   return e;
 }
 
-function SignupForm({ onSwitch, onClose }: { onSwitch: () => void; onClose: () => void }) {
+function SignupForm({ onSwitch, onClose, onSuccess }: { onSwitch: () => void; onClose: () => void; onSuccess?: (u: AuthUser) => void }) {
   const router = useRouter();
   const [form, setForm] = useState<SignupFields>(SIGNUP_INIT);
   const [errors, setErrors] = useState<SignupErrors>({});
@@ -454,10 +459,15 @@ function SignupForm({ onSwitch, onClose }: { onSwitch: () => void; onClose: () =
     setErrors({});
     try {
       const { data } = await authApi.register(form);
-      setAccessToken(data.data.accessToken);
+      setAccessToken(data.accessToken);
+      setStoredUser(data.user);
       onClose();
-      router.push('/');
-      router.refresh();
+      if (onSuccess) {
+        onSuccess(data.user);
+      } else {
+        router.push('/');
+        router.refresh();
+      }
     } catch (err) {
       setErrors({ global: extractApiError(err) });
     } finally {
@@ -718,13 +728,16 @@ function SignupForm({ onSwitch, onClose }: { onSwitch: () => void; onClose: () =
 }
 
 // ─────────────────────── MAIN EXPORT ────────────────────────
+export type AuthUser = { id: string; email: string; firstName: string; lastName: string; role: string };
+
 export interface AuthModalsProps {
   mode: 'login' | 'signup' | null;
   onClose: () => void;
   onSwitch: (to: 'login' | 'signup') => void;
+  onSuccess?: (user: AuthUser) => void;
 }
 
-export default function AuthModals({ mode, onClose, onSwitch }: AuthModalsProps) {
+export default function AuthModals({ mode, onClose, onSwitch, onSuccess }: AuthModalsProps) {
   return (
     <Dialog
       open={mode !== null}
@@ -778,9 +791,9 @@ export default function AuthModals({ mode, onClose, onSwitch }: AuthModalsProps)
           </IconButton>
 
           {mode === 'login' ? (
-            <LoginForm onClose={onClose} onSwitch={() => onSwitch('signup')} />
+            <LoginForm onClose={onClose} onSwitch={() => onSwitch('signup')} onSuccess={onSuccess} />
           ) : (
-            <SignupForm onClose={onClose} onSwitch={() => onSwitch('login')} />
+            <SignupForm onClose={onClose} onSwitch={() => onSwitch('login')} onSuccess={onSuccess} />
           )}
         </Box>
       </Box>

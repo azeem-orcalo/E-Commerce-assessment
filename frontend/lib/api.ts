@@ -8,14 +8,37 @@ export const api = axios.create({
   headers: { 'Content-Type': 'application/json' },
 });
 
-let accessToken: string | null = null;
+const TOKEN_KEY = 'ba_access_token';
+const USER_KEY = 'ba_user';
+
+let accessToken: string | null =
+  typeof window !== 'undefined' ? localStorage.getItem(TOKEN_KEY) : null;
 
 export function setAccessToken(token: string | null) {
   accessToken = token;
+  if (typeof window === 'undefined') return;
+  if (token) localStorage.setItem(TOKEN_KEY, token);
+  else localStorage.removeItem(TOKEN_KEY);
 }
 
 export function getAccessToken() {
   return accessToken;
+}
+
+export function setStoredUser(user: { id: string; email: string; firstName: string; lastName: string; role: string } | null) {
+  if (typeof window === 'undefined') return;
+  if (user) localStorage.setItem(USER_KEY, JSON.stringify(user));
+  else localStorage.removeItem(USER_KEY);
+}
+
+export function getStoredUser(): { id: string; email: string; firstName: string; lastName: string; role: string } | null {
+  if (typeof window === 'undefined') return null;
+  try {
+    const raw = localStorage.getItem(USER_KEY);
+    return raw ? JSON.parse(raw) : null;
+  } catch {
+    return null;
+  }
 }
 
 api.interceptors.request.use((config) => {
@@ -37,7 +60,7 @@ api.interceptors.response.use(
           {},
           { withCredentials: true },
         );
-        setAccessToken(data.data.accessToken);
+        setAccessToken(data.accessToken);
         if (original) {
           original.headers = original.headers ?? {};
           original.headers['Authorization'] = `Bearer ${data.data.accessToken}`;
@@ -69,15 +92,13 @@ export interface LoginPayload {
 }
 
 export interface AuthResponse {
-  data: {
-    accessToken: string;
-    user: {
-      id: string;
-      email: string;
-      firstName: string;
-      lastName: string;
-      role: string;
-    };
+  accessToken: string;
+  user: {
+    id: string;
+    email: string;
+    firstName: string;
+    lastName: string;
+    role: string;
   };
 }
 
@@ -94,6 +115,85 @@ export const authApi = {
   logout: () =>
     api.post('/auth/logout'),
 };
+
+// ─── Products & Categories ───────────────────────────────────────────────────
+
+export interface Category {
+  id: string;
+  name: string;
+}
+
+export interface ApiProduct {
+  id: string;
+  name: string;
+  description: string;
+  price: string;
+  imageUrl: string | null;
+  stock: number;
+  categoryId: string;
+  category: { id: string; name: string };
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface ProductsMeta {
+  page: number;
+  limit: number;
+  total: number;
+  totalPages: number;
+}
+
+export interface ProductsResponse {
+  data: ApiProduct[];
+  meta: ProductsMeta;
+}
+
+export interface ProductsQueryParams {
+  search?: string;
+  categoryId?: string;
+  minPrice?: number;
+  maxPrice?: number;
+  sortBy?: 'featured' | 'best_seller' | 'price_asc' | 'price_desc' | 'newest';
+  page?: number;
+  limit?: number;
+}
+
+export const productsApi = {
+  list: (params?: ProductsQueryParams) =>
+    api.get<ProductsResponse>('/products', { params }),
+  getOne: (id: string) =>
+    api.get<ApiProduct>(`/products/${id}`),
+};
+
+export const categoriesApi = {
+  list: () => api.get<Category[]>('/categories'),
+};
+
+// ─── Favorites ───────────────────────────────────────────────────────────────
+
+export interface FavoriteToggleResponse {
+  productId: string;
+  favorited: boolean;
+}
+
+export interface FavoritesListResponse {
+  data: (ApiProduct & { favorited: boolean })[];
+}
+
+export const favoritesApi = {
+  /** Toggle on/off — returns { productId, favorited: boolean } */
+  toggle: (productId: string) =>
+    api.post<FavoriteToggleResponse>(`/favorites/${productId}`),
+
+  /** Check a single product's favorite status */
+  check: (productId: string) =>
+    api.get<FavoriteToggleResponse>(`/favorites/${productId}`),
+
+  /** List all favorited products */
+  list: () => api.get<FavoritesListResponse>('/favorites'),
+};
+
+// ─── Utilities ───────────────────────────────────────────────────────────────
 
 export function extractApiError(error: unknown): string {
   if (error instanceof AxiosError) {

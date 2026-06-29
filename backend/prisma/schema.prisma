@@ -40,8 +40,9 @@ model User {
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
-  cart   Cart?
-  orders Order[]
+  cart      Cart?
+  orders    Order[]
+  favorites Favorite[]
 
   @@map("users")
 }
@@ -75,8 +76,21 @@ model Product {
 
   cartItems  CartItem[]
   orderItems OrderItem[]
+  favorites  Favorite[]
 
   @@map("products")
+}
+
+model Favorite {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  productId String
+  product   Product  @relation(fields: [productId], references: [id])
+  createdAt DateTime @default(now())
+
+  @@unique([userId, productId])
+  @@map("favorites")
 }
 
 model Cart {
@@ -97,7 +111,12 @@ model CartItem {
   product   Product @relation(fields: [productId], references: [id])
   quantity  Int
 
-  @@unique([cartId, productId])
+  // Variant attributes captured at add-to-cart time; empty string = no variant selected
+  chosenColor String @default("")
+  chosenSize  String @default("")
+
+  // Scoped uniqueness: same product + variant combo must not duplicate in one cart
+  @@unique([cartId, productId, chosenColor, chosenSize])
   @@map("cart_items")
 }
 

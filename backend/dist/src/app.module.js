@@ -13,6 +13,10 @@ const core_1 = require("@nestjs/core");
 const prisma_module_1 = require("./prisma/prisma.module");
 const users_module_1 = require("./users/users.module");
 const auth_module_1 = require("./auth/auth.module");
+const products_module_1 = require("./products/products.module");
+const categories_module_1 = require("./categories/categories.module");
+const cart_module_1 = require("./cart/cart.module");
+const favorites_module_1 = require("./favorites/favorites.module");
 const jwt_auth_guard_1 = require("./auth/guards/jwt-auth.guard");
 const roles_guard_1 = require("./auth/guards/roles.guard");
 let AppModule = class AppModule {
@@ -25,6 +29,10 @@ exports.AppModule = AppModule = __decorate([
             prisma_module_1.PrismaModule,
             users_module_1.UsersModule,
             auth_module_1.AuthModule,
+            products_module_1.ProductsModule,
+            categories_module_1.CategoriesModule,
+            cart_module_1.CartModule,
+            favorites_module_1.FavoritesModule,
         ],
         providers: [
             { provide: core_1.APP_GUARD, useClass: jwt_auth_guard_1.JwtAuthGuard },
