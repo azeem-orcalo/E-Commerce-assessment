@@ -454,10 +454,8 @@ export default function CheckoutPage() {
 
   useEffect(() => {
     const user = getStoredUser();
-    if (!user) {
-      router.replace('/');
-      return;
-    }
+    if (!user) { router.replace('/'); return; }
+    if (user.role === 'ADMIN') { router.replace('/admin'); return; }
 
     Promise.all([
       cartApi.get(),

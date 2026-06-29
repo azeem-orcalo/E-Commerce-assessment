@@ -51,10 +51,8 @@ export default function FavoritesPage() {
 
   useEffect(() => {
     const user = getStoredUser();
-    if (!user) {
-      router.replace('/');
-      return;
-    }
+    if (!user) { router.replace('/'); return; }
+    if (user.role === 'ADMIN') { router.replace('/admin'); return; }
     setCurrentUser(user);
   }, [router]);
 

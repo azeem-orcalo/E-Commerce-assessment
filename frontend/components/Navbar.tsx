@@ -16,6 +16,7 @@ import {
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
 import FavoriteIcon from '@mui/icons-material/Favorite';
 import MenuIcon from '@mui/icons-material/Menu';
+import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings';
 import { type AuthUser } from '@/components/AuthModals';
 import { useCart } from '@/lib/CartContext';
 import { useFavorites } from '@/lib/useFavorites';
@@ -65,9 +66,12 @@ export default function Navbar({ currentUser, onSignIn, onSignUp, onLogout }: Na
     });
   };
 
-  const visibleItems = NAV_ITEMS.filter(
-    (item) => item.label !== 'My Orders' || !!currentUser,
-  );
+  const isAdmin = currentUser?.role === 'ADMIN';
+
+  const visibleItems = NAV_ITEMS.filter((item) => {
+    if (item.label === 'My Orders') return !!currentUser && !isAdmin;
+    return true;
+  });
 
   return (
     <AppBar
@@ -109,33 +113,35 @@ export default function Navbar({ currentUser, onSignIn, onSignUp, onLogout }: Na
 
           {/* Right: favorites + cart + auth */}
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-            {/* Favorites */}
-            <IconButton
-              aria-label="View wishlist"
-              onClick={() => currentUser ? router.push('/favorites') : onSignIn()}
-              sx={{ color: 'rgba(255,255,255,0.85)', '&:hover': { color: ACCENT } }}
-            >
-              <Badge
-                badgeContent={favorites.length > 0 ? favorites.length : undefined}
-                max={99}
-                sx={{
-                  '& .MuiBadge-badge': {
-                    bgcolor: ACCENT,
-                    color: '#fff',
-                    fontWeight: 800,
-                    fontSize: '0.68rem',
-                    minWidth: 18,
-                    height: 18,
-                    padding: '0 4px',
-                  },
-                }}
+            {/* Favorites — hidden for admins */}
+            {!isAdmin && (
+              <IconButton
+                aria-label="View wishlist"
+                onClick={() => currentUser ? router.push('/favorites') : onSignIn()}
+                sx={{ color: 'rgba(255,255,255,0.85)', '&:hover': { color: ACCENT } }}
               >
-                <FavoriteIcon sx={{ fontSize: 22 }} />
-              </Badge>
-            </IconButton>
+                <Badge
+                  badgeContent={favorites.length > 0 ? favorites.length : undefined}
+                  max={99}
+                  sx={{
+                    '& .MuiBadge-badge': {
+                      bgcolor: ACCENT,
+                      color: '#fff',
+                      fontWeight: 800,
+                      fontSize: '0.68rem',
+                      minWidth: 18,
+                      height: 18,
+                      padding: '0 4px',
+                    },
+                  }}
+                >
+                  <FavoriteIcon sx={{ fontSize: 22 }} />
+                </Badge>
+              </IconButton>
+            )}
 
-            {/* Cart */}
-            <IconButton
+            {/* Cart — hidden for admins */}
+            {!isAdmin && <IconButton
               onClick={openCart}
               aria-label="Open cart"
               sx={{ color: 'rgba(255,255,255,0.85)', '&:hover': { color: ACCENT } }}
@@ -158,7 +164,7 @@ export default function Navbar({ currentUser, onSignIn, onSignUp, onLogout }: Na
               >
                 <ShoppingCartIcon sx={{ fontSize: 22 }} />
               </Badge>
-            </IconButton>
+            </IconButton>}
 
             {currentUser ? (
               <Box sx={{ display: { xs: 'none', sm: 'flex' }, alignItems: 'center', gap: 1.2 }}>
@@ -188,6 +194,26 @@ export default function Navbar({ currentUser, onSignIn, onSignUp, onLogout }: Na
                 >
                   {currentUser.firstName}
                 </Typography>
+                {isAdmin && (
+                  <Button
+                    variant="contained"
+                    startIcon={<AdminPanelSettingsIcon sx={{ fontSize: 18 }} />}
+                    onClick={() => router.push('/admin')}
+                    sx={{
+                      bgcolor: ACCENT,
+                      color: '#fff',
+                      textTransform: 'none',
+                      fontWeight: 700,
+                      fontSize: '0.88rem',
+                      borderRadius: '8px',
+                      px: 2,
+                      boxShadow: 'none',
+                      '&:hover': { bgcolor: '#d93540', boxShadow: '0 4px 14px rgba(247,68,78,0.4)' },
+                    }}
+                  >
+                    Admin Panel
+                  </Button>
+                )}
                 <Button
                   variant="outlined"
                   onClick={onLogout}
