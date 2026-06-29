@@ -71,6 +71,64 @@ let AdminService = class AdminService {
             },
         });
     }
+    async getUsers(page, limit, search) {
+        const where = search
+            ? {
+                OR: [
+                    { firstName: { contains: search, mode: 'insensitive' } },
+                    { lastName: { contains: search, mode: 'insensitive' } },
+                    { email: { contains: search, mode: 'insensitive' } },
+                ],
+            }
+            : {};
+        const [users, total] = await Promise.all([
+            this.prisma.user.findMany({
+                where,
+                skip: (page - 1) * limit,
+                take: limit,
+                orderBy: { createdAt: 'desc' },
+                select: {
+                    id: true,
+                    email: true,
+                    firstName: true,
+                    lastName: true,
+                    phone: true,
+                    city: true,
+                    role: true,
+                    createdAt: true,
+                    _count: { select: { orders: true } },
+                },
+            }),
+            this.prisma.user.count({ where }),
+        ]);
+        return { data: users, meta: { page, limit, total } };
+    }
+    async updateUser(userId, dto) {
+        const user = await this.prisma.user.findUnique({ where: { id: userId } });
+        if (!user)
+            throw new common_1.NotFoundException('User not found');
+        return this.prisma.user.update({
+            where: { id: userId },
+            data: { ...dto },
+            select: {
+                id: true,
+                email: true,
+                firstName: true,
+                lastName: true,
+                phone: true,
+                city: true,
+                role: true,
+                createdAt: true,
+            },
+        });
+    }
+    async deleteUser(userId) {
+        const user = await this.prisma.user.findUnique({ where: { id: userId } });
+        if (!user)
+            throw new common_1.NotFoundException('User not found');
+        await this.prisma.user.delete({ where: { id: userId } });
+        return { message: 'User deleted successfully' };
+    }
     async getDashboardStats() {
         const [totalRevenue, ordersByStatus, topProducts, totalOrders, activeProducts] = await Promise.all([
             this.prisma.order.aggregate({
@@ -105,8 +163,8 @@ let AdminService = class AdminService {
                 count: o._count.id,
             })),
             topProducts: topProducts.map((tp) => ({
-                product: productMap.get(tp.productId),
-                totalSold: tp._sum.quantity ?? 0,
+                name: productMap.get(tp.productId)?.name ?? 'Unknown',
+                unitsSold: tp._sum.quantity ?? 0,
             })),
         };
     }

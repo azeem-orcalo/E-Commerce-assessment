@@ -327,6 +327,53 @@ export const reviewsApi = {
     api.get<ReviewCheckResponse>('/reviews/check', { params: { productId, orderId } }),
 };
 
+// ─── Offers ──────────────────────────────────────────────────────────────────
+
+export interface Offer {
+  id: string;
+  title: string;
+  description: string | null;
+  discountPercent: number;
+  startDate: string;
+  endDate: string;
+  isActive: boolean;
+  imageUrl: string | null;
+  createdAt: string;
+}
+
+export const offersApi = {
+  nearest: () => api.get<Offer | null>('/offers/nearest'),
+  active: () => api.get<Offer[]>('/offers'),
+};
+
+// ─── Admin Users ─────────────────────────────────────────────────────────────
+
+export interface AdminUser {
+  id: string;
+  email: string;
+  firstName: string;
+  lastName: string;
+  phone: string;
+  city: string;
+  role: 'CUSTOMER' | 'ADMIN';
+  createdAt: string;
+  _count: { orders: number };
+}
+
+export interface AdminUsersResponse {
+  data: AdminUser[];
+  meta: { page: number; limit: number; total: number };
+}
+
+export const adminUsersApi = {
+  list: (params?: { page?: number; limit?: number; search?: string }) =>
+    api.get<AdminUsersResponse>('/admin/users', { params }),
+  update: (id: string, data: { role?: string }) =>
+    api.patch<AdminUser>(`/admin/users/${id}`, data),
+  delete: (id: string) =>
+    api.delete(`/admin/users/${id}`),
+};
+
 // ─── Utilities ───────────────────────────────────────────────────────────────
 
 export function extractApiError(error: unknown): string {

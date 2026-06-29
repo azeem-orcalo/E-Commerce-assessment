@@ -19,6 +19,7 @@ const client_1 = require("@prisma/client");
 const roles_decorator_1 = require("../auth/decorators/roles.decorator");
 const admin_service_1 = require("./admin.service");
 const update_order_status_dto_1 = require("./dto/update-order-status.dto");
+const update_user_dto_1 = require("./dto/update-user.dto");
 let AdminController = class AdminController {
     adminService;
     constructor(adminService) {
@@ -32,6 +33,15 @@ let AdminController = class AdminController {
     }
     getDashboardStats() {
         return this.adminService.getDashboardStats();
+    }
+    getUsers(page = '1', limit = '20', search) {
+        return this.adminService.getUsers(Math.max(1, parseInt(page, 10) || 1), Math.min(100, parseInt(limit, 10) || 20), search);
+    }
+    updateUser(userId, dto) {
+        return this.adminService.updateUser(userId, dto);
+    }
+    deleteUser(userId) {
+        return this.adminService.deleteUser(userId);
     }
 };
 exports.AdminController = AdminController;
@@ -61,6 +71,33 @@ __decorate([
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", void 0)
 ], AdminController.prototype, "getDashboardStats", null);
+__decorate([
+    (0, common_1.Get)('users'),
+    (0, swagger_1.ApiOperation)({ summary: 'List all users (paginated, searchable)' }),
+    __param(0, (0, common_1.Query)('page')),
+    __param(1, (0, common_1.Query)('limit')),
+    __param(2, (0, common_1.Query)('search')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, Object, String]),
+    __metadata("design:returntype", void 0)
+], AdminController.prototype, "getUsers", null);
+__decorate([
+    (0, common_1.Patch)('users/:id'),
+    (0, swagger_1.ApiOperation)({ summary: 'Update user role' }),
+    __param(0, (0, common_1.Param)('id', common_1.ParseUUIDPipe)),
+    __param(1, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, update_user_dto_1.UpdateUserDto]),
+    __metadata("design:returntype", void 0)
+], AdminController.prototype, "updateUser", null);
+__decorate([
+    (0, common_1.Delete)('users/:id'),
+    (0, swagger_1.ApiOperation)({ summary: 'Delete a user account' }),
+    __param(0, (0, common_1.Param)('id', common_1.ParseUUIDPipe)),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", void 0)
+], AdminController.prototype, "deleteUser", null);
 exports.AdminController = AdminController = __decorate([
     (0, swagger_1.ApiTags)('Admin'),
     (0, roles_decorator_1.Roles)(client_1.Role.ADMIN),

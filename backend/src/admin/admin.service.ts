@@ -1,6 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { OrderStatus } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
+import { UpdateUserDto } from './dto/update-user.dto';
 
 @Injectable()
 export class AdminService {
@@ -62,6 +63,69 @@ export class AdminService {
     });
   }
 
+  async getUsers(page: number, limit: number, search?: string) {
+    const where = search
+      ? {
+          OR: [
+            { firstName: { contains: search, mode: 'insensitive' as const } },
+            { lastName: { contains: search, mode: 'insensitive' as const } },
+            { email: { contains: search, mode: 'insensitive' as const } },
+          ],
+        }
+      : {};
+
+    const [users, total] = await Promise.all([
+      this.prisma.user.findMany({
+        where,
+        skip: (page - 1) * limit,
+        take: limit,
+        orderBy: { createdAt: 'desc' },
+        select: {
+          id: true,
+          email: true,
+          firstName: true,
+          lastName: true,
+          phone: true,
+          city: true,
+          role: true,
+          createdAt: true,
+          _count: { select: { orders: true } },
+        },
+      }),
+      this.prisma.user.count({ where }),
+    ]);
+
+    return { data: users, meta: { page, limit, total } };
+  }
+
+  async updateUser(userId: string, dto: UpdateUserDto) {
+    const user = await this.prisma.user.findUnique({ where: { id: userId } });
+    if (!user) throw new NotFoundException('User not found');
+
+    return this.prisma.user.update({
+      where: { id: userId },
+      data: { ...dto },
+      select: {
+        id: true,
+        email: true,
+        firstName: true,
+        lastName: true,
+        phone: true,
+        city: true,
+        role: true,
+        createdAt: true,
+      },
+    });
+  }
+
+  async deleteUser(userId: string) {
+    const user = await this.prisma.user.findUnique({ where: { id: userId } });
+    if (!user) throw new NotFoundException('User not found');
+
+    await this.prisma.user.delete({ where: { id: userId } });
+    return { message: 'User deleted successfully' };
+  }
+
   async getDashboardStats() {
     const [totalRevenue, ordersByStatus, topProducts, totalOrders, activeProducts] = await Promise.all([
       this.prisma.order.aggregate({
@@ -99,8 +163,8 @@ export class AdminService {
         count: o._count.id,
       })),
       topProducts: topProducts.map((tp) => ({
-        product: productMap.get(tp.productId),
-        totalSold: tp._sum.quantity ?? 0,
+        name: productMap.get(tp.productId)?.name ?? 'Unknown',
+        unitsSold: tp._sum.quantity ?? 0,
       })),
     };
   }

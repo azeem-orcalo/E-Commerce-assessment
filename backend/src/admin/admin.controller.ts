@@ -1,9 +1,9 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   Param,
-  ParseIntPipe,
   ParseUUIDPipe,
   Patch,
   Query,
@@ -13,6 +13,7 @@ import { OrderStatus, Role } from '@prisma/client';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { AdminService } from './admin.service';
 import { UpdateOrderStatusDto } from './dto/update-order-status.dto';
+import { UpdateUserDto } from './dto/update-user.dto';
 
 @ApiTags('Admin')
 @Roles(Role.ADMIN)
@@ -47,5 +48,34 @@ export class AdminController {
   @ApiOperation({ summary: 'Dashboard stats: revenue, orders by status, top products' })
   getDashboardStats() {
     return this.adminService.getDashboardStats();
+  }
+
+  @Get('users')
+  @ApiOperation({ summary: 'List all users (paginated, searchable)' })
+  getUsers(
+    @Query('page') page = '1',
+    @Query('limit') limit = '20',
+    @Query('search') search?: string,
+  ) {
+    return this.adminService.getUsers(
+      Math.max(1, parseInt(page, 10) || 1),
+      Math.min(100, parseInt(limit, 10) || 20),
+      search,
+    );
+  }
+
+  @Patch('users/:id')
+  @ApiOperation({ summary: 'Update user role' })
+  updateUser(
+    @Param('id', ParseUUIDPipe) userId: string,
+    @Body() dto: UpdateUserDto,
+  ) {
+    return this.adminService.updateUser(userId, dto);
+  }
+
+  @Delete('users/:id')
+  @ApiOperation({ summary: 'Delete a user account' })
+  deleteUser(@Param('id', ParseUUIDPipe) userId: string) {
+    return this.adminService.deleteUser(userId);
   }
 }

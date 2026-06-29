@@ -28,7 +28,7 @@ import AddIcon from '@mui/icons-material/Add';
 import RemoveIcon from '@mui/icons-material/Remove';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import AuthModals, { type AuthUser } from '@/components/AuthModals';
-import { authApi, productsApi, setAccessToken, getStoredUser, setStoredUser, type ApiProduct } from '@/lib/api';
+import { authApi, productsApi, reviewsApi, setAccessToken, getStoredUser, setStoredUser, type ApiProduct, type Review } from '@/lib/api';
 import Navbar from '@/components/Navbar';
 import { useFavorites } from '@/lib/useFavorites';
 import { useCart } from '@/lib/CartContext';
@@ -56,6 +56,8 @@ export default function ProductDetailPage() {
 
   const [product, setProduct] = useState<ApiProduct | null>(null);
   const [relatedProducts, setRelatedProducts] = useState<ApiProduct[]>([]);
+  const [reviews, setReviews] = useState<Review[]>([]);
+  const [reviewsLoading, setReviewsLoading] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
 
@@ -110,6 +112,11 @@ export default function ProductDetailPage() {
       .then((res) => {
         const p = res.data as ApiProduct;
         setProduct(p);
+        setReviewsLoading(true);
+        reviewsApi.findByProduct(id)
+          .then((r) => setReviews(r.data))
+          .catch(() => {})
+          .finally(() => setReviewsLoading(false));
         // Fetch related products in same category
         return productsApi.list({ categoryId: p.categoryId, limit: 5 });
       })
@@ -145,6 +152,8 @@ export default function ProductDetailPage() {
   const price = product ? parseFloat(product.price) : 0;
   const originalPrice = (price * 1.3).toFixed(2);
   const discount = Math.round((1 - price / (price * 1.3)) * 100);
+  const reviewCount = reviews.length;
+  const avgRating = reviewCount > 0 ? reviews.reduce((sum, r) => sum + r.rating, 0) / reviewCount : 0;
 
 
   if (loading) {
@@ -180,7 +189,7 @@ export default function ProductDetailPage() {
     <ThemeProvider theme={theme}>
       <CssBaseline />
 
-      {Navbar}
+      <Navbar currentUser={currentUser} onSignIn={() => setAuthModal('login')} onSignUp={() => setAuthModal('signup')} onLogout={handleLogout} />
 
       {/* ─── HERO BANNER ─── */}
       <Box
@@ -229,8 +238,8 @@ export default function ProductDetailPage() {
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, flexWrap: 'wrap' }}>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.8, bgcolor: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.15)', borderRadius: '999px', px: 2, py: 0.7, backdropFilter: 'blur(8px)' }}>
               <StarIcon sx={{ fontSize: 14, color: '#f59e0b' }} />
-              <Typography sx={{ color: '#fff', fontSize: '0.8rem', fontWeight: 700 }}>4.8</Typography>
-              <Typography sx={{ color: 'rgba(255,255,255,0.6)', fontSize: '0.77rem' }}>(124 reviews)</Typography>
+              <Typography sx={{ color: '#fff', fontSize: '0.8rem', fontWeight: 700 }}>{reviewCount > 0 ? avgRating.toFixed(1) : '—'}</Typography>
+              <Typography sx={{ color: 'rgba(255,255,255,0.6)', fontSize: '0.77rem' }}>({reviewCount} {reviewCount === 1 ? 'review' : 'reviews'})</Typography>
             </Box>
             <Box sx={{ bgcolor: ACCENT, color: '#fff', px: 2, py: 0.7, borderRadius: '999px', fontSize: '0.85rem', fontWeight: 800, boxShadow: '0 4px 14px rgba(247,68,78,0.45)' }}>
               ${price.toFixed(2)}
@@ -328,11 +337,11 @@ export default function ProductDetailPage() {
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.8 }}>
                   <Box sx={{ display: 'flex' }}>
                     {[1,2,3,4,5].map((s) => (
-                      <StarIcon key={s} sx={{ fontSize: 16, color: s <= 5 ? '#f59e0b' : '#e5e7eb' }} />
+                      <StarIcon key={s} sx={{ fontSize: 16, color: s <= Math.round(avgRating) ? '#f59e0b' : '#e5e7eb' }} />
                     ))}
                   </Box>
-                  <Typography sx={{ fontSize: '0.83rem', fontWeight: 700, color: '#374151' }}>4.8</Typography>
-                  <Typography sx={{ fontSize: '0.8rem', color: '#9ca3af' }}>(124 reviews)</Typography>
+                  <Typography sx={{ fontSize: '0.83rem', fontWeight: 700, color: '#374151' }}>{reviewCount > 0 ? avgRating.toFixed(1) : '—'}</Typography>
+                  <Typography sx={{ fontSize: '0.8rem', color: '#9ca3af' }}>({reviewCount} {reviewCount === 1 ? 'review' : 'reviews'})</Typography>
                 </Box>
               </Box>
 
@@ -520,31 +529,42 @@ export default function ProductDetailPage() {
 
                 {activeTab === 'reviews' && (
                   <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-                    {[
-                      { name: 'Sarah M.', rating: 5, text: 'Absolutely love this piece. The quality is exceptional and it fits exactly as described. Will definitely be ordering more!', date: '2 days ago' },
-                      { name: 'James K.', rating: 4, text: 'Great product overall. The material feels premium and delivery was fast. Only minor thing is sizing runs slightly large.', date: '1 week ago' },
-                      { name: 'Emma L.', rating: 5, text: 'This exceeded my expectations. The colour in person is even better than in the photos. Highly recommend!', date: '2 weeks ago' },
-                    ].map((review) => (
-                      <Box key={review.name} sx={{ p: 2.5, borderRadius: '12px', border: '1.5px solid #f0f0f4', bgcolor: '#fafbfc' }}>
-                        <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-                            <Box sx={{ width: 36, height: 36, borderRadius: '50%', bgcolor: NAVY, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                              <Typography sx={{ color: '#fff', fontWeight: 800, fontSize: '0.85rem' }}>{review.name[0]}</Typography>
-                            </Box>
-                            <Box>
-                              <Typography sx={{ fontWeight: 700, fontSize: '0.88rem', color: NAVY }}>{review.name}</Typography>
-                              <Box sx={{ display: 'flex' }}>
-                                {Array.from({ length: 5 }, (_, i) => (
-                                  <StarIcon key={i} sx={{ fontSize: 12, color: i < review.rating ? '#f59e0b' : '#e5e7eb' }} />
-                                ))}
-                              </Box>
-                            </Box>
-                          </Box>
-                          <Typography sx={{ fontSize: '0.75rem', color: '#9ca3af' }}>{review.date}</Typography>
-                        </Box>
-                        <Typography sx={{ color: '#4b5563', fontSize: '0.85rem', lineHeight: 1.7 }}>{review.text}</Typography>
+                    {reviewsLoading ? (
+                      <Box sx={{ display: 'flex', justifyContent: 'center', py: 4 }}>
+                        <CircularProgress size={32} sx={{ color: ACCENT }} />
                       </Box>
-                    ))}
+                    ) : reviews.length === 0 ? (
+                      <Box sx={{ textAlign: 'center', py: 4 }}>
+                        <Typography sx={{ color: '#9ca3af', fontSize: '0.9rem' }}>No reviews yet. Be the first to review this product!</Typography>
+                      </Box>
+                    ) : (
+                      reviews.map((review) => {
+                        const fullName = `${review.user.firstName} ${review.user.lastName}`;
+                        const initials = `${review.user.firstName[0]}${review.user.lastName[0]}`.toUpperCase();
+                        const formattedDate = new Date(review.createdAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+                        return (
+                          <Box key={review.orderId + review.productId} sx={{ p: 2.5, borderRadius: '12px', border: '1.5px solid #f0f0f4', bgcolor: '#fafbfc' }}>
+                            <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+                              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                                <Box sx={{ width: 36, height: 36, borderRadius: '50%', bgcolor: NAVY, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                  <Typography sx={{ color: '#fff', fontWeight: 800, fontSize: '0.85rem' }}>{initials}</Typography>
+                                </Box>
+                                <Box>
+                                  <Typography sx={{ fontWeight: 700, fontSize: '0.88rem', color: NAVY }}>{fullName}</Typography>
+                                  <Box sx={{ display: 'flex' }}>
+                                    {Array.from({ length: 5 }, (_, i) => (
+                                      <StarIcon key={i} sx={{ fontSize: 12, color: i < review.rating ? '#f59e0b' : '#e5e7eb' }} />
+                                    ))}
+                                  </Box>
+                                </Box>
+                              </Box>
+                              <Typography sx={{ fontSize: '0.75rem', color: '#9ca3af' }}>{formattedDate}</Typography>
+                            </Box>
+                            <Typography sx={{ color: '#4b5563', fontSize: '0.85rem', lineHeight: 1.7 }}>{review.comment}</Typography>
+                          </Box>
+                        );
+                      })
+                    )}
                   </Box>
                 )}
 
