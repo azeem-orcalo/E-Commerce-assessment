@@ -21,20 +21,20 @@ export declare class AdminController {
                 };
             } & {
                 id: string;
-                orderId: string;
                 productId: string;
+                orderId: string;
                 quantity: number;
                 priceAtPurchase: import("@prisma/client-runtime-utils").Decimal;
             })[];
         } & {
             id: string;
+            createdAt: Date;
+            updatedAt: Date;
             userId: string;
             status: import(".prisma/client").$Enums.OrderStatus;
             totalAmount: import("@prisma/client-runtime-utils").Decimal;
             paymentMethod: import(".prisma/client").$Enums.PaymentMethod;
             stripePaymentIntentId: string | null;
-            createdAt: Date;
-            updatedAt: Date;
         })[];
         meta: {
             page: number;
@@ -57,20 +57,20 @@ export declare class AdminController {
             };
         } & {
             id: string;
-            orderId: string;
             productId: string;
+            orderId: string;
             quantity: number;
             priceAtPurchase: import("@prisma/client-runtime-utils").Decimal;
         })[];
     } & {
         id: string;
+        createdAt: Date;
+        updatedAt: Date;
         userId: string;
         status: import(".prisma/client").$Enums.OrderStatus;
         totalAmount: import("@prisma/client-runtime-utils").Decimal;
         paymentMethod: import(".prisma/client").$Enums.PaymentMethod;
         stripePaymentIntentId: string | null;
-        createdAt: Date;
-        updatedAt: Date;
     }) | null>;
     getDashboardStats(): Promise<{
         totalRevenue: number;
@@ -88,16 +88,16 @@ export declare class AdminController {
     getUsers(page?: string, limit?: string, search?: string): Promise<{
         data: {
             id: string;
-            createdAt: Date;
-            _count: {
-                orders: number;
-            };
             email: string;
             firstName: string;
             lastName: string;
             phone: string;
             city: string;
             role: import(".prisma/client").$Enums.Role;
+            createdAt: Date;
+            _count: {
+                orders: number;
+            };
         }[];
         meta: {
             page: number;
@@ -107,13 +107,13 @@ export declare class AdminController {
     }>;
     updateUser(userId: string, dto: UpdateUserDto): Promise<{
         id: string;
-        createdAt: Date;
         email: string;
         firstName: string;
         lastName: string;
         phone: string;
         city: string;
         role: import(".prisma/client").$Enums.Role;
+        createdAt: Date;
     }>;
     deleteUser(userId: string): Promise<{
         message: string;

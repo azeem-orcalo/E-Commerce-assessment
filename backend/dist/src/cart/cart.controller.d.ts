@@ -24,10 +24,10 @@ export declare class CartController {
         } & {
             id: string;
             productId: string;
-            cartId: string;
             quantity: number;
             chosenColor: string;
             chosenSize: string;
+            cartId: string;
         })[];
         id: string;
         updatedAt: Date;
@@ -48,10 +48,10 @@ export declare class CartController {
     } & {
         id: string;
         productId: string;
-        cartId: string;
         quantity: number;
         chosenColor: string;
         chosenSize: string;
+        cartId: string;
     }>;
     updateItem(userId: string, itemId: string, dto: UpdateCartItemDto): Promise<({
         product: {
@@ -68,10 +68,10 @@ export declare class CartController {
     } & {
         id: string;
         productId: string;
-        cartId: string;
         quantity: number;
         chosenColor: string;
         chosenSize: string;
+        cartId: string;
     }) | {
         deleted: boolean;
     }>;

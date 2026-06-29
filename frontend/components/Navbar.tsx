@@ -22,12 +22,11 @@ const ACCENT = '#f7444e';
 const NAVY = '#002c3e';
 
 const NAV_ITEMS = [
-  { label: 'Home',         href: '/' },
-  { label: 'Products',     href: '/products' },
-  { label: 'New Arrivals', href: '/products?sort=newest' },
-  { label: 'Offers',       href: '/offers' },
-  { label: 'About',        href: '/about' },
-  { label: 'My Orders',    href: '/orders' },
+  { label: 'Home',      href: '/' },
+  { label: 'Products',  href: '/products' },
+  { label: 'Offers',    href: '/offers' },
+  { label: 'About',     href: '/about' },
+  { label: 'My Orders', href: '/orders' },
 ];
 
 interface NavbarProps {
