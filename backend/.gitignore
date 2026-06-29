@@ -1,0 +1,6 @@
+node_modules
+# Keep environment variables out of version control
+.env
+
+# Prisma 7 generated client (regenerated via `npx prisma generate`)
+/generated/prisma
