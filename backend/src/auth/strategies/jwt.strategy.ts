@@ -15,13 +15,17 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
   }
 
   async validate(payload: JwtPayload): Promise<SafeUser> {
-    // Use Prisma select to ensure passwordHash never touches req.user
+    // Explicit select ensures passwordHash never touches req.user
     const user = await this.prisma.user.findUnique({
       where: { id: payload.sub },
       select: {
         id: true,
         email: true,
-        name: true,
+        firstName: true,
+        lastName: true,
+        phone: true,
+        city: true,
+        address: true,
         role: true,
         createdAt: true,
         updatedAt: true,

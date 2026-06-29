@@ -1,0 +1,30 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  *, *::before, *::after {
+    box-sizing: border-box;
+  }
+
+  html {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    @apply bg-white text-brand-900 font-sans;
+  }
+}
+
+@layer components {
+  .auth-card {
+    @apply w-full max-w-md mx-auto bg-white;
+  }
+
+  .field-error {
+    @apply text-red-500 text-xs mt-1 font-normal;
+  }
+}

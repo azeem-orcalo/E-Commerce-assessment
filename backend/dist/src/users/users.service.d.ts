@@ -8,7 +8,11 @@ export declare class UsersService {
         id: string;
         email: string;
         passwordHash: string;
-        name: string;
+        firstName: string;
+        lastName: string;
+        phone: string;
+        city: string;
+        address: string;
         role: import(".prisma/client").$Enums.Role;
         createdAt: Date;
         updatedAt: Date;

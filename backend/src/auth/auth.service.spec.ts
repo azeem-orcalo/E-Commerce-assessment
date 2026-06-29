@@ -1,5 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { ConflictException, UnauthorizedException } from '@nestjs/common';
+import { BadRequestException, ConflictException, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import { AuthService } from './auth.service';
@@ -29,12 +29,27 @@ const mockJwtService = {
 const makeUser = (overrides: Partial<Record<string, unknown>> = {}) => ({
   id: 'user-uuid-1',
   email: 'test@example.com',
-  name: 'Test User',
+  firstName: 'Test',
+  lastName: 'User',
+  phone: '+447700900001',
+  city: 'London',
+  address: '1 Test Street',
   role: 'CUSTOMER',
   createdAt: new Date('2024-01-01'),
   updatedAt: new Date('2024-01-01'),
   ...overrides,
 });
+
+const registerDto = {
+  firstName: 'Jane',
+  lastName: 'Doe',
+  email: 'new@example.com',
+  phone: '+447700900002',
+  city: 'Manchester',
+  address: '42 New Road',
+  password: 'Password123!',
+  confirmPassword: 'Password123!',
+};
 
 // ─── Tests ───────────────────────────────────────────────────────────────────
 
@@ -58,56 +73,77 @@ describe('AuthService', () => {
   // ── register ───────────────────────────────────────────────────────────────
 
   describe('register', () => {
-    const dto = { email: 'new@example.com', password: 'Password123!', name: 'New User' };
-
     beforeEach(() => {
       mockUsersService.findByEmail.mockResolvedValue(null);
-      mockPrisma.user.create.mockResolvedValue(makeUser({ email: dto.email, name: dto.name }));
+      mockPrisma.user.create.mockResolvedValue(
+        makeUser({ email: registerDto.email, firstName: registerDto.firstName, lastName: registerDto.lastName }),
+      );
     });
 
     it('stores a bcrypt hash — not the plain-text password', async () => {
-      await service.register(dto);
+      await service.register(registerDto);
 
       const createCall = mockPrisma.user.create.mock.calls[0][0] as {
         data: { passwordHash: string };
       };
       const stored = createCall.data.passwordHash;
 
-      expect(stored).not.toBe(dto.password);
-      expect(await bcrypt.compare(dto.password, stored)).toBe(true);
+      expect(stored).not.toBe(registerDto.password);
+      expect(await bcrypt.compare(registerDto.password, stored)).toBe(true);
     });
 
     it('never returns passwordHash in the response', async () => {
-      const result = await service.register(dto);
+      const result = await service.register(registerDto);
       expect(result.user).not.toHaveProperty('passwordHash');
     });
 
+    it('never returns confirmPassword in the response', async () => {
+      const result = await service.register(registerDto);
+      expect(result.user).not.toHaveProperty('confirmPassword');
+    });
+
     it('returns accessToken and sets refreshToken', async () => {
-      const result = await service.register(dto);
+      const result = await service.register(registerDto);
       expect(result.accessToken).toBe('mock.jwt.token');
       expect(result.refreshToken).toBe('mock.jwt.token');
     });
 
-    it('returns user object with id, email, name, role, createdAt', async () => {
-      const result = await service.register(dto);
+    it('returns user object with expected profile fields', async () => {
+      const result = await service.register(registerDto);
       expect(result.user).toMatchObject({
         id: expect.any(String),
         email: expect.any(String),
-        name: expect.any(String),
+        firstName: expect.any(String),
+        lastName: expect.any(String),
+        phone: expect.any(String),
+        city: expect.any(String),
+        address: expect.any(String),
         role: expect.any(String),
         createdAt: expect.any(Date),
       });
     });
 
+    it('throws BadRequestException when passwords do not match', async () => {
+      const dto = { ...registerDto, confirmPassword: 'DifferentPass1!' };
+      await expect(service.register(dto)).rejects.toThrow(BadRequestException);
+      await expect(service.register(dto)).rejects.toThrow('Passwords do not match');
+    });
+
+    it('does NOT hash or create user when passwords mismatch', async () => {
+      const dto = { ...registerDto, confirmPassword: 'Mismatch99!' };
+      await expect(service.register(dto)).rejects.toThrow();
+      expect(mockPrisma.user.create).not.toHaveBeenCalled();
+    });
+
     it('throws ConflictException when email is already registered', async () => {
       mockUsersService.findByEmail.mockResolvedValue(makeUser());
-      await expect(service.register(dto)).rejects.toThrow(ConflictException);
-      await expect(service.register(dto)).rejects.toThrow('Email is already registered');
+      await expect(service.register(registerDto)).rejects.toThrow(ConflictException);
+      await expect(service.register(registerDto)).rejects.toThrow('Email is already registered');
     });
 
     it('does NOT create a user when email is taken', async () => {
       mockUsersService.findByEmail.mockResolvedValue(makeUser());
-      await expect(service.register(dto)).rejects.toThrow();
+      await expect(service.register(registerDto)).rejects.toThrow();
       expect(mockPrisma.user.create).not.toHaveBeenCalled();
     });
   });

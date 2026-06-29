@@ -72,13 +72,35 @@ let AuthService = class AuthService {
         this.jwtService = jwtService;
     }
     async register(dto) {
+        if (dto.password !== dto.confirmPassword) {
+            throw new common_1.BadRequestException('Passwords do not match');
+        }
         const existing = await this.users.findByEmail(dto.email);
         if (existing)
             throw new common_1.ConflictException('Email is already registered');
         const passwordHash = await bcrypt.hash(dto.password, BCRYPT_ROUNDS);
         const user = await this.prisma.user.create({
-            data: { email: dto.email, passwordHash, name: dto.name },
-            select: { id: true, email: true, name: true, role: true, createdAt: true, updatedAt: true },
+            data: {
+                email: dto.email,
+                passwordHash,
+                firstName: dto.firstName,
+                lastName: dto.lastName,
+                phone: dto.phone,
+                city: dto.city,
+                address: dto.address,
+            },
+            select: {
+                id: true,
+                email: true,
+                firstName: true,
+                lastName: true,
+                phone: true,
+                city: true,
+                address: true,
+                role: true,
+                createdAt: true,
+                updatedAt: true,
+            },
         });
         return this.buildTokenResponse(user);
     }
@@ -113,7 +135,17 @@ let AuthService = class AuthService {
             expiresIn: parseExpiryToSeconds(process.env['JWT_REFRESH_EXPIRY'], 604800),
         });
         return {
-            user: { id: user.id, email: user.email, name: user.name, role: user.role, createdAt: user.createdAt },
+            user: {
+                id: user.id,
+                email: user.email,
+                firstName: user.firstName,
+                lastName: user.lastName,
+                phone: user.phone,
+                city: user.city,
+                address: user.address,
+                role: user.role,
+                createdAt: user.createdAt,
+            },
             accessToken,
             refreshToken,
         };

@@ -9,7 +9,11 @@ export interface JwtPayload {
 export interface SafeUser {
     id: string;
     email: string;
-    name: string;
+    firstName: string;
+    lastName: string;
+    phone: string;
+    city: string;
+    address: string;
     role: Role;
     createdAt: Date;
     updatedAt: Date;

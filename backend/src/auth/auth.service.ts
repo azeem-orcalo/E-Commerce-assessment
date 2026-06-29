@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   ConflictException,
   Injectable,
   UnauthorizedException,
@@ -9,7 +10,7 @@ import { UsersService } from '../users/users.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
-import { JwtPayload, AuthTokensResponse } from '../common/types';
+import { JwtPayload, AuthTokensResponse, SafeUser } from '../common/types';
 
 const BCRYPT_ROUNDS = 10;
 
@@ -36,27 +37,51 @@ export class AuthService {
   ) {}
 
   async register(dto: RegisterDto): Promise<AuthTokensResponse & { refreshToken: string }> {
+    if (dto.password !== dto.confirmPassword) {
+      throw new BadRequestException('Passwords do not match');
+    }
+
     const existing = await this.users.findByEmail(dto.email);
     if (existing) throw new ConflictException('Email is already registered');
 
     const passwordHash = await bcrypt.hash(dto.password, BCRYPT_ROUNDS);
+
     const user = await this.prisma.user.create({
-      data: { email: dto.email, passwordHash, name: dto.name },
-      select: { id: true, email: true, name: true, role: true, createdAt: true, updatedAt: true },
+      data: {
+        email: dto.email,
+        passwordHash,
+        firstName: dto.firstName,
+        lastName: dto.lastName,
+        phone: dto.phone,
+        city: dto.city,
+        address: dto.address,
+      },
+      select: {
+        id: true,
+        email: true,
+        firstName: true,
+        lastName: true,
+        phone: true,
+        city: true,
+        address: true,
+        role: true,
+        createdAt: true,
+        updatedAt: true,
+      },
     });
 
     return this.buildTokenResponse(user);
   }
 
   async login(dto: LoginDto): Promise<AuthTokensResponse & { refreshToken: string }> {
-    // Fetch full user (including passwordHash) for verification only
+    // Fetch full user (including passwordHash) for credential verification only
     const user = await this.users.findByEmail(dto.email);
     if (!user) throw new UnauthorizedException('Invalid email or password');
 
     const passwordValid = await bcrypt.compare(dto.password, user.passwordHash);
     if (!passwordValid) throw new UnauthorizedException('Invalid email or password');
 
-    // Rebuild safe user without passwordHash before returning
+    // Strip passwordHash before passing to buildTokenResponse
     const { passwordHash: _ph, ...safeUser } = user;
     return this.buildTokenResponse(safeUser);
   }
@@ -69,13 +94,11 @@ export class AuthService {
     return this.buildTokenResponse(user);
   }
 
-  private buildTokenResponse(
-    user: { id: string; email: string; name: string; role: string; createdAt: Date },
-  ): AuthTokensResponse & { refreshToken: string } {
+  private buildTokenResponse(user: SafeUser): AuthTokensResponse & { refreshToken: string } {
     const jwtPayload: JwtPayload = {
       sub: user.id,
       email: user.email,
-      role: user.role as 'CUSTOMER' | 'ADMIN',
+      role: user.role,
     };
 
     const accessToken = this.jwtService.sign(jwtPayload, {
@@ -89,7 +112,17 @@ export class AuthService {
     });
 
     return {
-      user: { id: user.id, email: user.email, name: user.name, role: user.role as 'CUSTOMER' | 'ADMIN', createdAt: user.createdAt },
+      user: {
+        id: user.id,
+        email: user.email,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        phone: user.phone,
+        city: user.city,
+        address: user.address,
+        role: user.role,
+        createdAt: user.createdAt,
+      },
       accessToken,
       refreshToken,
     };

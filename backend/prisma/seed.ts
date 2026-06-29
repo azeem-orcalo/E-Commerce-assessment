@@ -37,11 +37,23 @@ async function main(): Promise<void> {
 
     const admin = await prisma.user.upsert({
       where: { email: 'admin@store.com' },
-      update: { passwordHash: adminHash, name: 'Store Admin', role: Role.ADMIN },
+      update: {
+        passwordHash: adminHash,
+        firstName: 'Store',
+        lastName: 'Admin',
+        phone: '+447700900001',
+        city: 'London',
+        address: '1 Admin Lane',
+        role: Role.ADMIN,
+      },
       create: {
         email: 'admin@store.com',
         passwordHash: adminHash,
-        name: 'Store Admin',
+        firstName: 'Store',
+        lastName: 'Admin',
+        phone: '+447700900001',
+        city: 'London',
+        address: '1 Admin Lane',
         role: Role.ADMIN,
       },
     });
@@ -49,11 +61,22 @@ async function main(): Promise<void> {
 
     const customer = await prisma.user.upsert({
       where: { email: 'customer@store.com' },
-      update: { passwordHash: customerHash, name: 'Jane Doe' },
+      update: {
+        passwordHash: customerHash,
+        firstName: 'Jane',
+        lastName: 'Doe',
+        phone: '+447700900002',
+        city: 'Manchester',
+        address: '42 Customer Street',
+      },
       create: {
         email: 'customer@store.com',
         passwordHash: customerHash,
-        name: 'Jane Doe',
+        firstName: 'Jane',
+        lastName: 'Doe',
+        phone: '+447700900002',
+        city: 'Manchester',
+        address: '42 Customer Street',
         role: Role.CUSTOMER,
       },
     });
