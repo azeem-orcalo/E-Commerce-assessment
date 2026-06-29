@@ -2,14 +2,20 @@ import type { Metadata } from 'next';
 import './globals.css';
 
 export const metadata: Metadata = {
-  title: 'DRAPE — Modern Clothing',
-  description: 'Minimalist fashion for the modern wardrobe.',
+  title: 'BinAzeem — Premium Fashion',
+  description: 'Premium clothing for the modern wardrobe.',
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
-      <body className="min-h-screen bg-white antialiased">{children}</body>
+      <head>
+        <link
+          href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap"
+          rel="stylesheet"
+        />
+      </head>
+      <body style={{ margin: 0, padding: 0 }}>{children}</body>
     </html>
   );
 }
