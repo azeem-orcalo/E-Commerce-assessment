@@ -39,9 +39,9 @@ export declare class OrdersController {
         })[];
     } & {
         id: string;
-        userId: string;
-        updatedAt: Date;
         createdAt: Date;
+        updatedAt: Date;
+        userId: string;
         status: import(".prisma/client").$Enums.OrderStatus;
         totalAmount: import("@prisma/client-runtime-utils").Decimal;
         paymentMethod: import(".prisma/client").$Enums.PaymentMethod;
@@ -64,9 +64,9 @@ export declare class OrdersController {
         })[];
     } & {
         id: string;
-        userId: string;
-        updatedAt: Date;
         createdAt: Date;
+        updatedAt: Date;
+        userId: string;
         status: import(".prisma/client").$Enums.OrderStatus;
         totalAmount: import("@prisma/client-runtime-utils").Decimal;
         paymentMethod: import(".prisma/client").$Enums.PaymentMethod;

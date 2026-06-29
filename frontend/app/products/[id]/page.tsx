@@ -7,8 +7,6 @@ import {
   ThemeProvider,
   createTheme,
   CssBaseline,
-  AppBar,
-  Toolbar,
   Typography,
   Button,
   Container,
@@ -17,12 +15,10 @@ import {
   Chip,
   Divider,
   CircularProgress,
-  Badge,
 } from '@mui/material';
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
 import FavoriteIcon from '@mui/icons-material/Favorite';
 import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
-import MenuIcon from '@mui/icons-material/Menu';
 import StarIcon from '@mui/icons-material/Star';
 import LocalShippingIcon from '@mui/icons-material/LocalShipping';
 import ReplayIcon from '@mui/icons-material/Replay';
@@ -33,6 +29,7 @@ import RemoveIcon from '@mui/icons-material/Remove';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import AuthModals, { type AuthUser } from '@/components/AuthModals';
 import { authApi, productsApi, setAccessToken, getStoredUser, setStoredUser, type ApiProduct } from '@/lib/api';
+import Navbar from '@/components/Navbar';
 import { useFavorites } from '@/lib/useFavorites';
 import { useCart } from '@/lib/CartContext';
 
@@ -96,9 +93,8 @@ export default function ProductDetailPage() {
   };
   const [activeTab, setActiveTab] = useState<'description' | 'reviews' | 'shipping'>('description');
   const [authModal, setAuthModal] = useState<'login' | 'signup' | null>(null);
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [addedToCart, setAddedToCart] = useState(false);
-  const { itemCount, openCart, addItem, refreshCart, resetCartState } = useCart();
+  const { openCart, addItem, refreshCart, resetCartState } = useCart();
 
   // Rehydrate auth from localStorage after mount (avoids SSR/client mismatch)
   useEffect(() => {
@@ -150,108 +146,12 @@ export default function ProductDetailPage() {
   const originalPrice = (price * 1.3).toFixed(2);
   const discount = Math.round((1 - price / (price * 1.3)) * 100);
 
-  const Navbar = (
-    <AppBar position="sticky" elevation={0} sx={{ bgcolor: NAVY, boxShadow: '0 2px 24px rgba(0,44,62,0.3)' }}>
-      <Container maxWidth="xl">
-        <Toolbar sx={{ py: 1, justifyContent: 'space-between', minHeight: { xs: 64, md: 72 } }}>
-          <Link href="/" style={{ textDecoration: 'none' }}>
-            <Typography variant="h5" sx={{ fontWeight: 800, letterSpacing: '0.06em', color: '#fff', cursor: 'pointer' }}>
-              Bin<Box component="span" sx={{ color: ACCENT }}>Azeem</Box>
-            </Typography>
-          </Link>
-
-          <Box sx={{ display: { xs: 'none', md: 'flex' }, gap: 0.5 }}>
-            {[
-              { label: 'Home', href: '/' },
-              { label: 'Products', href: '/products' },
-              { label: 'New Arrivals', href: '/products?sort=newest' },
-              { label: 'About', href: '/' },
-            ].map((item) => (
-              <Link key={item.label} href={item.href} style={{ textDecoration: 'none' }}>
-                <Button sx={{ color: 'rgba(255,255,255,0.8)', fontWeight: 500, textTransform: 'none', fontSize: '0.95rem', px: 1.8, '&:hover': { color: ACCENT, bgcolor: 'rgba(247,68,78,0.08)' } }}>
-                  {item.label}
-                </Button>
-              </Link>
-            ))}
-          </Box>
-
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-            {/* Cart icon */}
-            <IconButton
-              onClick={openCart}
-              aria-label="Open cart"
-              sx={{ color: 'rgba(255,255,255,0.85)', '&:hover': { color: ACCENT } }}
-            >
-              <Badge
-                badgeContent={itemCount > 0 ? itemCount : undefined}
-                color="primary"
-                max={99}
-                sx={{
-                  '& .MuiBadge-badge': {
-                    bgcolor: ACCENT,
-                    color: '#fff',
-                    fontWeight: 800,
-                    fontSize: '0.68rem',
-                    minWidth: 18,
-                    height: 18,
-                    padding: '0 4px',
-                  },
-                }}
-              >
-                <ShoppingCartIcon sx={{ fontSize: 22 }} />
-              </Badge>
-            </IconButton>
-
-            {currentUser ? (
-              <>
-                <Box sx={{ display: { xs: 'none', sm: 'flex' }, alignItems: 'center', gap: 1.2 }}>
-                  <Box sx={{ width: 34, height: 34, borderRadius: '50%', bgcolor: ACCENT, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                    <Typography sx={{ color: '#fff', fontWeight: 800, fontSize: '0.82rem', lineHeight: 1 }}>
-                      {currentUser.firstName[0]}{currentUser.lastName[0]}
-                    </Typography>
-                  </Box>
-                  <Typography sx={{ color: 'rgba(255,255,255,0.85)', fontSize: '0.88rem', fontWeight: 600, display: { xs: 'none', md: 'block' } }}>
-                    {currentUser.firstName}
-                  </Typography>
-                </Box>
-                <Button variant="outlined" onClick={handleLogout} sx={{ display: { xs: 'none', sm: 'inline-flex' }, borderColor: 'rgba(255,255,255,0.3)', color: 'rgba(255,255,255,0.75)', textTransform: 'none', fontWeight: 500, fontSize: '0.88rem', '&:hover': { borderColor: ACCENT, color: ACCENT, bgcolor: 'transparent' } }}>
-                  Sign Out
-                </Button>
-              </>
-            ) : (
-              <>
-                <Button variant="outlined" onClick={() => setAuthModal('login')} sx={{ display: { xs: 'none', sm: 'inline-flex' }, borderColor: 'rgba(255,255,255,0.3)', color: '#fff', textTransform: 'none', fontWeight: 500, '&:hover': { borderColor: ACCENT, color: ACCENT, bgcolor: 'transparent' } }}>
-                  Sign In
-                </Button>
-                <Button variant="contained" color="primary" onClick={() => setAuthModal('signup')} sx={{ textTransform: 'none', fontWeight: 700, px: 2.5, boxShadow: '0 4px 14px rgba(247,68,78,0.4)', '&:hover': { transform: 'translateY(-1px)' } }}>
-                  Get Started
-                </Button>
-              </>
-            )}
-            <IconButton sx={{ color: 'rgba(255,255,255,0.7)', display: { xs: 'flex', md: 'none' } }} onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
-              <MenuIcon />
-            </IconButton>
-          </Box>
-        </Toolbar>
-
-        {mobileMenuOpen && (
-          <Box sx={{ display: { md: 'none' }, pb: 2, borderTop: '1px solid rgba(255,255,255,0.08)' }}>
-            {['Home', 'Products', 'New Arrivals', 'About'].map((item) => (
-              <Button key={item} fullWidth sx={{ color: 'rgba(255,255,255,0.8)', textTransform: 'none', justifyContent: 'flex-start', px: 2, py: 1.2, '&:hover': { color: ACCENT } }}>
-                {item}
-              </Button>
-            ))}
-          </Box>
-        )}
-      </Container>
-    </AppBar>
-  );
 
   if (loading) {
     return (
       <ThemeProvider theme={theme}>
         <CssBaseline />
-        {Navbar}
+        <Navbar currentUser={currentUser} onSignIn={() => setAuthModal('login')} onSignUp={() => setAuthModal('signup')} onLogout={handleLogout} />
         <Box sx={{ minHeight: '80vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
           <CircularProgress sx={{ color: ACCENT }} size={52} />
         </Box>
@@ -263,7 +163,7 @@ export default function ProductDetailPage() {
     return (
       <ThemeProvider theme={theme}>
         <CssBaseline />
-        {Navbar}
+        <Navbar currentUser={currentUser} onSignIn={() => setAuthModal('login')} onSignUp={() => setAuthModal('signup')} onLogout={handleLogout} />
         <Box sx={{ minHeight: '80vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 3, bgcolor: '#fafbfc' }}>
           <Typography variant="h3" sx={{ fontWeight: 800, color: NAVY }}>Product not found</Typography>
           <Link href="/products" style={{ textDecoration: 'none' }}>
