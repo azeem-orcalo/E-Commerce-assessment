@@ -208,9 +208,10 @@ function LoginForm({ onSwitch, onClose, onSuccess }: { onSwitch: () => void; onC
       onClose();
       if (onSuccess) {
         onSuccess(data.user);
+      } else if (data.user.role === 'ADMIN') {
+        window.location.href = '/admin';
       } else {
-        router.push(data.user.role === 'ADMIN' ? '/admin' : '/');
-        router.refresh();
+        router.push('/');
       }
     } catch (err) {
       setErrors({ global: extractApiError(err) });
