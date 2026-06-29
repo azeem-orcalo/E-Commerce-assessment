@@ -18,6 +18,7 @@ const categories_module_1 = require("./categories/categories.module");
 const cart_module_1 = require("./cart/cart.module");
 const favorites_module_1 = require("./favorites/favorites.module");
 const orders_module_1 = require("./orders/orders.module");
+const admin_module_1 = require("./admin/admin.module");
 const jwt_auth_guard_1 = require("./auth/guards/jwt-auth.guard");
 const roles_guard_1 = require("./auth/guards/roles.guard");
 let AppModule = class AppModule {
@@ -35,6 +36,7 @@ exports.AppModule = AppModule = __decorate([
             cart_module_1.CartModule,
             favorites_module_1.FavoritesModule,
             orders_module_1.OrdersModule,
+            admin_module_1.AdminModule,
         ],
         providers: [
             { provide: core_1.APP_GUARD, useClass: jwt_auth_guard_1.JwtAuthGuard },
