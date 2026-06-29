@@ -14,6 +14,8 @@ export declare class ProductsService {
             };
         } & {
             id: string;
+            createdAt: Date;
+            updatedAt: Date;
             name: string;
             description: string;
             price: Prisma.Decimal;
@@ -23,8 +25,6 @@ export declare class ProductsService {
             material: string | null;
             variants: Prisma.JsonValue | null;
             categoryId: string;
-            createdAt: Date;
-            updatedAt: Date;
         })[];
         meta: {
             page: number;
@@ -40,6 +40,8 @@ export declare class ProductsService {
         };
     } & {
         id: string;
+        createdAt: Date;
+        updatedAt: Date;
         name: string;
         description: string;
         price: Prisma.Decimal;
@@ -49,8 +51,6 @@ export declare class ProductsService {
         material: string | null;
         variants: Prisma.JsonValue | null;
         categoryId: string;
-        createdAt: Date;
-        updatedAt: Date;
     }>;
     update(id: string, dto: UpdateProductDto): Promise<{
         category: {
@@ -59,6 +59,8 @@ export declare class ProductsService {
         };
     } & {
         id: string;
+        createdAt: Date;
+        updatedAt: Date;
         name: string;
         description: string;
         price: Prisma.Decimal;
@@ -68,8 +70,6 @@ export declare class ProductsService {
         material: string | null;
         variants: Prisma.JsonValue | null;
         categoryId: string;
-        createdAt: Date;
-        updatedAt: Date;
     }>;
     remove(id: string): Promise<{
         message: string;
@@ -81,6 +81,8 @@ export declare class ProductsService {
         };
     } & {
         id: string;
+        createdAt: Date;
+        updatedAt: Date;
         name: string;
         description: string;
         price: Prisma.Decimal;
@@ -90,8 +92,6 @@ export declare class ProductsService {
         material: string | null;
         variants: Prisma.JsonValue | null;
         categoryId: string;
-        createdAt: Date;
-        updatedAt: Date;
     }>;
     private resolveOrderBy;
 }

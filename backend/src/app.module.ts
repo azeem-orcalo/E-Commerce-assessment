@@ -8,6 +8,7 @@ import { ProductsModule } from './products/products.module';
 import { CategoriesModule } from './categories/categories.module';
 import { CartModule } from './cart/cart.module';
 import { FavoritesModule } from './favorites/favorites.module';
+import { OrdersModule } from './orders/orders.module';
 import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
 import { RolesGuard } from './auth/guards/roles.guard';
 
@@ -21,6 +22,7 @@ import { RolesGuard } from './auth/guards/roles.guard';
     CategoriesModule,
     CartModule,
     FavoritesModule,
+    OrdersModule,
   ],
   providers: [
     // Guard order matters: JWT validates identity first, Roles checks authorization second

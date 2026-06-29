@@ -16,42 +16,42 @@ export declare class CartService {
             product: {
                 id: string;
                 name: string;
-                price: import("@prisma/client-runtime-utils").Decimal;
-                imageUrl: string | null;
-                stock: number;
                 category: {
                     id: string;
                     name: string;
                 };
+                price: import("@prisma/client-runtime-utils").Decimal;
+                imageUrl: string | null;
+                stock: number;
             };
         } & {
             id: string;
-            cartId: string;
             productId: string;
+            cartId: string;
             quantity: number;
             chosenColor: string;
             chosenSize: string;
         })[];
         id: string;
-        userId: string;
         updatedAt: Date;
+        userId: string;
     }>;
     addItem(userId: string, dto: AddCartItemDto): Promise<{
         product: {
             id: string;
             name: string;
-            price: import("@prisma/client-runtime-utils").Decimal;
-            imageUrl: string | null;
-            stock: number;
             category: {
                 id: string;
                 name: string;
             };
+            price: import("@prisma/client-runtime-utils").Decimal;
+            imageUrl: string | null;
+            stock: number;
         };
     } & {
         id: string;
-        cartId: string;
         productId: string;
+        cartId: string;
         quantity: number;
         chosenColor: string;
         chosenSize: string;
@@ -60,18 +60,18 @@ export declare class CartService {
         product: {
             id: string;
             name: string;
-            price: import("@prisma/client-runtime-utils").Decimal;
-            imageUrl: string | null;
-            stock: number;
             category: {
                 id: string;
                 name: string;
             };
+            price: import("@prisma/client-runtime-utils").Decimal;
+            imageUrl: string | null;
+            stock: number;
         };
     } & {
         id: string;
-        cartId: string;
         productId: string;
+        cartId: string;
         quantity: number;
         chosenColor: string;
         chosenSize: string;

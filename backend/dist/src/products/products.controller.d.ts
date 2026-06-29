@@ -13,6 +13,8 @@ export declare class ProductsController {
             };
         } & {
             id: string;
+            createdAt: Date;
+            updatedAt: Date;
             name: string;
             description: string;
             price: import("@prisma/client-runtime-utils").Decimal;
@@ -22,8 +24,6 @@ export declare class ProductsController {
             material: string | null;
             variants: import("@prisma/client/runtime/client").JsonValue | null;
             categoryId: string;
-            createdAt: Date;
-            updatedAt: Date;
         })[];
         meta: {
             page: number;
@@ -39,6 +39,8 @@ export declare class ProductsController {
         };
     } & {
         id: string;
+        createdAt: Date;
+        updatedAt: Date;
         name: string;
         description: string;
         price: import("@prisma/client-runtime-utils").Decimal;
@@ -48,8 +50,6 @@ export declare class ProductsController {
         material: string | null;
         variants: import("@prisma/client/runtime/client").JsonValue | null;
         categoryId: string;
-        createdAt: Date;
-        updatedAt: Date;
     }>;
     create(dto: CreateProductDto): Promise<{
         category: {
@@ -58,6 +58,8 @@ export declare class ProductsController {
         };
     } & {
         id: string;
+        createdAt: Date;
+        updatedAt: Date;
         name: string;
         description: string;
         price: import("@prisma/client-runtime-utils").Decimal;
@@ -67,8 +69,6 @@ export declare class ProductsController {
         material: string | null;
         variants: import("@prisma/client/runtime/client").JsonValue | null;
         categoryId: string;
-        createdAt: Date;
-        updatedAt: Date;
     }>;
     update(id: string, dto: UpdateProductDto): Promise<{
         category: {
@@ -77,6 +77,8 @@ export declare class ProductsController {
         };
     } & {
         id: string;
+        createdAt: Date;
+        updatedAt: Date;
         name: string;
         description: string;
         price: import("@prisma/client-runtime-utils").Decimal;
@@ -86,8 +88,6 @@ export declare class ProductsController {
         material: string | null;
         variants: import("@prisma/client/runtime/client").JsonValue | null;
         categoryId: string;
-        createdAt: Date;
-        updatedAt: Date;
     }>;
     remove(id: string): Promise<{
         message: string;

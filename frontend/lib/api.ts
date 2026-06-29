@@ -248,6 +248,51 @@ export const cartApi = {
     api.delete('/cart'),
 };
 
+// ─── Orders ──────────────────────────────────────────────────────────────────
+
+export type PaymentMethod = 'COD' | 'CARD';
+export type OrderStatus = 'PENDING' | 'PROCESSING' | 'SHIPPED' | 'DELIVERED' | 'CANCELLED';
+
+export interface OrderItem {
+  id: string;
+  productId: string;
+  quantity: number;
+  priceAtPurchase: string;
+  product: { id: string; name: string; imageUrl: string | null; price: string };
+}
+
+export interface Order {
+  id: string;
+  userId: string;
+  status: OrderStatus;
+  paymentMethod: PaymentMethod;
+  totalAmount: string;
+  stripePaymentIntentId?: string | null;
+  items: OrderItem[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CheckoutPayload {
+  paymentMethod: PaymentMethod;
+}
+
+export interface CheckoutResponse {
+  orderId: string;
+  status: OrderStatus;
+  paymentMethod: PaymentMethod;
+  totalAmount: string;
+  clientSecret?: string;
+  items: OrderItem[];
+}
+
+export const ordersApi = {
+  checkout: (payload: CheckoutPayload) =>
+    api.post<CheckoutResponse>('/orders/checkout', payload),
+  list: () => api.get<Order[]>('/orders'),
+  getOne: (id: string) => api.get<Order>(`/orders/${id}`),
+};
+
 // ─── Utilities ───────────────────────────────────────────────────────────────
 
 export function extractApiError(error: unknown): string {
