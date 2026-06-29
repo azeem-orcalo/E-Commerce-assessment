@@ -21,10 +21,12 @@ import {
   Alert,
   Avatar,
   Stack,
+  Chip,
 } from '@mui/material';
 import LocalShippingIcon from '@mui/icons-material/LocalShipping';
 import CreditCardIcon from '@mui/icons-material/CreditCard';
 import LockIcon from '@mui/icons-material/Lock';
+import LocalOfferIcon from '@mui/icons-material/LocalOffer';
 import { loadStripe } from '@stripe/stripe-js';
 import {
   Elements,
@@ -35,9 +37,11 @@ import {
 import {
   ordersApi,
   cartApi,
+  offersApi,
   extractApiError,
   getStoredUser,
   type CartItem,
+  type Offer,
 } from '@/lib/api';
 import { useCart } from '@/lib/CartContext';
 
@@ -73,10 +77,12 @@ const CARD_ELEMENT_OPTIONS = {
 function CheckoutForm({
   items,
   cartTotal,
+  activeOffer,
   onSuccess,
 }: {
   items: CartItem[];
   cartTotal: number;
+  activeOffer: Offer | null;
   onSuccess: (orderId: string) => void;
 }) {
   const stripe = useStripe();
@@ -85,6 +91,14 @@ function CheckoutForm({
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const { resetCartState } = useCart();
+
+  const discountPercent = activeOffer ? Number(activeOffer.discountPercent) : 0;
+  const discountAmount = activeOffer
+    ? parseFloat((cartTotal * discountPercent / 100).toFixed(2))
+    : 0;
+  const grandTotal = activeOffer
+    ? parseFloat((cartTotal - discountAmount).toFixed(2))
+    : cartTotal;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -131,8 +145,6 @@ function CheckoutForm({
       setSubmitting(false);
     }
   };
-
-  const grandTotal = cartTotal;
 
   return (
     <Box component="form" onSubmit={handleSubmit}>
@@ -255,6 +267,38 @@ function CheckoutForm({
               Order Summary
             </Typography>
 
+            {/* Active offer banner */}
+            {activeOffer && (
+              <Box
+                sx={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 1,
+                  bgcolor: '#fff7ed',
+                  border: '1px solid #fed7aa',
+                  borderRadius: 2,
+                  px: 1.5,
+                  py: 1,
+                  mb: 2,
+                }}
+              >
+                <LocalOfferIcon sx={{ fontSize: 16, color: '#ea580c' }} />
+                <Box sx={{ flex: 1 }}>
+                  <Typography variant="caption" sx={{ fontWeight: 700, color: '#c2410c', display: 'block' }}>
+                    {activeOffer.title}
+                  </Typography>
+                  <Typography variant="caption" sx={{ color: '#9a3412' }}>
+                    {discountPercent}% off applied automatically
+                  </Typography>
+                </Box>
+                <Chip
+                  label={`-${discountPercent}%`}
+                  size="small"
+                  sx={{ bgcolor: '#ea580c', color: '#fff', fontWeight: 700, fontSize: '0.7rem' }}
+                />
+              </Box>
+            )}
+
             <Stack spacing={1.5} sx={{ mb: 2 }}>
               {items.map((item) => (
                 <Box key={item.id} sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
@@ -290,8 +334,30 @@ function CheckoutForm({
             <Stack spacing={1}>
               <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
                 <Typography variant="body2" sx={{ color: 'text.secondary' }}>Subtotal</Typography>
-                <Typography variant="body2" sx={{ fontWeight: 600 }}>£{cartTotal.toFixed(2)}</Typography>
+                <Typography
+                  variant="body2"
+                  sx={{
+                    fontWeight: 600,
+                    // strike through original price when a discount is active
+                    textDecoration: activeOffer ? 'line-through' : 'none',
+                    color: activeOffer ? 'text.secondary' : 'inherit',
+                  }}
+                >
+                  £{cartTotal.toFixed(2)}
+                </Typography>
               </Box>
+
+              {activeOffer && (
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <Typography variant="body2" sx={{ color: '#16a34a', fontWeight: 600 }}>
+                    Discount ({discountPercent}% off)
+                  </Typography>
+                  <Typography variant="body2" sx={{ fontWeight: 700, color: '#16a34a' }}>
+                    -£{discountAmount.toFixed(2)}
+                  </Typography>
+                </Box>
+              )}
+
               <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
                 <Typography variant="body2" sx={{ color: 'text.secondary' }}>Shipping</Typography>
                 <Typography variant="body2" sx={{ fontWeight: 600, color: 'success.main' }}>Free</Typography>
@@ -300,11 +366,20 @@ function CheckoutForm({
 
             <Divider sx={{ my: 1.5 }} />
 
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2.5 }}>
-              <Typography sx={{ fontWeight: 700, color: NAVY }}>Total</Typography>
-              <Typography sx={{ fontWeight: 800, fontSize: '1.2rem', color: ACCENT }}>
-                £{grandTotal.toFixed(2)}
-              </Typography>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2.5 }}>
+              <Box>
+                <Typography sx={{ fontWeight: 700, color: NAVY }}>Total</Typography>
+                {activeOffer && (
+                  <Typography variant="caption" sx={{ color: '#16a34a' }}>
+                    You save £{discountAmount.toFixed(2)}!
+                  </Typography>
+                )}
+              </Box>
+              <Box sx={{ textAlign: 'right' }}>
+                <Typography sx={{ fontWeight: 800, fontSize: '1.2rem', color: ACCENT }}>
+                  £{grandTotal.toFixed(2)}
+                </Typography>
+              </Box>
             </Box>
 
             <Button
@@ -355,6 +430,7 @@ export default function CheckoutPage() {
   const router = useRouter();
   const [items, setItems] = useState<CartItem[]>([]);
   const [cartTotal, setCartTotal] = useState(0);
+  const [activeOffer, setActiveOffer] = useState<Offer | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -363,17 +439,27 @@ export default function CheckoutPage() {
       router.replace('/');
       return;
     }
-    cartApi.get().then((res) => {
-      const cartItems = res.data.items ?? [];
-      setItems(cartItems);
-      const total = cartItems.reduce(
-        (sum, item) => sum + item.quantity * parseFloat(item.product.price),
-        0,
-      );
-      setCartTotal(total);
-    }).catch(() => {
-      router.replace('/');
-    }).finally(() => setLoading(false));
+
+    Promise.all([
+      cartApi.get(),
+      offersApi.active().catch(() => ({ data: [] as Offer[] })),
+    ])
+      .then(([cartRes, offersRes]) => {
+        const cartItems = cartRes.data.items ?? [];
+        setItems(cartItems);
+        const total = cartItems.reduce(
+          (sum, item) => sum + item.quantity * parseFloat(item.product.price),
+          0,
+        );
+        setCartTotal(total);
+
+        const offers: Offer[] = Array.isArray(offersRes.data) ? offersRes.data : [];
+        setActiveOffer(offers.length > 0 ? offers[0] : null);
+      })
+      .catch(() => {
+        router.replace('/');
+      })
+      .finally(() => setLoading(false));
   }, [router]);
 
   const handleSuccess = (orderId: string) => {
@@ -409,6 +495,14 @@ export default function CheckoutPage() {
     );
   }
 
+  const discountPercent = activeOffer ? Number(activeOffer.discountPercent) : 0;
+  const discountAmount = activeOffer
+    ? parseFloat((cartTotal * discountPercent / 100).toFixed(2))
+    : 0;
+  const grandTotal = activeOffer
+    ? parseFloat((cartTotal - discountAmount).toFixed(2))
+    : cartTotal;
+
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
@@ -439,15 +533,20 @@ export default function CheckoutPage() {
             Checkout
           </Typography>
           <Typography variant="body2" sx={{ color: 'text.secondary', mb: 3 }}>
-            {items.length} item{items.length !== 1 ? 's' : ''} · £{cartTotal.toFixed(2)}
+            {items.length} item{items.length !== 1 ? 's' : ''} · £{grandTotal.toFixed(2)}
+            {activeOffer && (
+              <Typography component="span" variant="body2" sx={{ color: '#16a34a', ml: 0.5 }}>
+                (after {discountPercent}% sale discount)
+              </Typography>
+            )}
           </Typography>
 
           {stripePromise ? (
             <Elements stripe={stripePromise}>
-              <CheckoutForm items={items} cartTotal={cartTotal} onSuccess={handleSuccess} />
+              <CheckoutForm items={items} cartTotal={cartTotal} activeOffer={activeOffer} onSuccess={handleSuccess} />
             </Elements>
           ) : (
-            <CheckoutForm items={items} cartTotal={cartTotal} onSuccess={handleSuccess} />
+            <CheckoutForm items={items} cartTotal={cartTotal} activeOffer={activeOffer} onSuccess={handleSuccess} />
           )}
         </Container>
       </Box>

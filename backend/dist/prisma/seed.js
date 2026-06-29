@@ -300,6 +300,51 @@ async function main() {
             }
         }
         console.log(`\n✅ Products seeded — ${created} created, ${updated} updated\n`);
+        const offersData = [
+            {
+                title: 'Summer Sale — Up to 30% Off',
+                description: 'Beat the heat with our biggest summer discounts. Selected tops, dresses, and lightweight outerwear all at reduced prices.',
+                discountPercent: 30,
+                startDate: new Date('2026-06-01T00:00:00Z'),
+                endDate: new Date('2026-07-31T23:59:59Z'),
+                isActive: true,
+                imageUrl: 'https://images.unsplash.com/photo-1445205170230-053b83016050?w=1200&q=80',
+            },
+            {
+                title: 'New Arrivals — 15% Off Everything',
+                description: 'Fresh drops just landed. Get 15% off all new season pieces — limited time only.',
+                discountPercent: 15,
+                startDate: new Date('2026-06-15T00:00:00Z'),
+                endDate: new Date('2026-07-15T23:59:59Z'),
+                isActive: true,
+                imageUrl: 'https://images.unsplash.com/photo-1490481651871-ab68de25d43d?w=1200&q=80',
+            },
+            {
+                title: 'Weekend Flash Deal — 20% Off',
+                description: 'This weekend only — take 20% off sitewide. No code needed, discount applied at checkout.',
+                discountPercent: 20,
+                startDate: new Date('2026-06-28T00:00:00Z'),
+                endDate: new Date('2026-07-20T23:59:59Z'),
+                isActive: true,
+                imageUrl: 'https://images.unsplash.com/photo-1509631179647-0177331693ae?w=1200&q=80',
+            },
+        ];
+        let offersCreated = 0;
+        let offersUpdated = 0;
+        for (const o of offersData) {
+            const existing = await prisma.offer.findFirst({ where: { title: o.title } });
+            if (existing) {
+                await prisma.offer.update({ where: { id: existing.id }, data: o });
+                offersUpdated++;
+                process.stdout.write(`  🔄 ${o.title} (updated)\n`);
+            }
+            else {
+                await prisma.offer.create({ data: o });
+                offersCreated++;
+                process.stdout.write(`  ✅ ${o.title} (created)\n`);
+            }
+        }
+        console.log(`\n✅ Offers seeded — ${offersCreated} created, ${offersUpdated} updated\n`);
         console.log('─'.repeat(50));
         console.log('Seed complete!\n');
         console.log('Login credentials:');

@@ -1,3 +1,4 @@
+import { CategoryDto } from './dto/category.dto';
 import { CategoriesService } from './categories.service';
 export declare class CategoriesController {
     private readonly categoriesService;
@@ -6,4 +7,15 @@ export declare class CategoriesController {
         id: string;
         name: string;
     }[]>;
+    create(dto: CategoryDto): Promise<{
+        id: string;
+        name: string;
+    }>;
+    update(id: string, dto: CategoryDto): Promise<{
+        id: string;
+        name: string;
+    }>;
+    remove(id: string): Promise<{
+        message: string;
+    }>;
 }

@@ -93,6 +93,7 @@ export default function ProductsPage() {
   const [meta, setMeta] = useState<ProductsMeta>({ page: 1, limit: 12, total: 0, totalPages: 0 });
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
+  const [limit, setLimit] = useState(12);
   const [debouncedSearch, setDebouncedSearch] = useState('');
   const [debouncedPriceRange, setDebouncedPriceRange] = useState<number[]>([0, 200]);
 
@@ -124,7 +125,7 @@ export default function ProductsPage() {
     try {
       const params: ProductsQueryParams = {
         page,
-        limit: 12,
+        limit,
         sortBy: SORT_MAP[sortBy] ?? 'featured',
       };
       if (debouncedSearch) params.search = debouncedSearch;
@@ -140,7 +141,7 @@ export default function ProductsPage() {
     } finally {
       setLoading(false);
     }
-  }, [page, sortBy, debouncedSearch, selectedCategoryId, debouncedPriceRange]);
+  }, [page, limit, sortBy, debouncedSearch, selectedCategoryId, debouncedPriceRange]);
 
   useEffect(() => { fetchProducts(); }, [fetchProducts]);
 
@@ -195,11 +196,17 @@ export default function ProductsPage() {
     setPage(1);
   };
 
+  const handleLimitChange = (value: number) => {
+    setLimit(value);
+    setPage(1);
+  };
+
   const handleResetFilters = () => {
     setPriceRange([0, 200]);
     setSelectedCategoryId('');
     setSearchQuery('');
     setSortBy('featured');
+    setLimit(12);
     setPage(1);
     setShowFavoritesOnly(false);
   };
@@ -373,6 +380,26 @@ export default function ProductsPage() {
                 <MenuItem value="price-asc">Price: Low → High</MenuItem>
                 <MenuItem value="price-desc">Price: High → Low</MenuItem>
                 <MenuItem value="rating">Best Sellers</MenuItem>
+              </Select>
+            </FormControl>
+
+            {/* Per-page selector */}
+            <FormControl size="small" sx={{ minWidth: 110 }}>
+              <Select
+                value={limit}
+                onChange={(e) => handleLimitChange(e.target.value as number)}
+                displayEmpty
+                sx={{
+                  fontSize: '0.88rem', fontWeight: 600, color: NAVY,
+                  bgcolor: '#f5f6f8', borderRadius: '10px',
+                  '& .MuiOutlinedInput-notchedOutline': { borderColor: '#e5e7eb' },
+                  '&:hover .MuiOutlinedInput-notchedOutline': { borderColor: ACCENT },
+                  '&.Mui-focused .MuiOutlinedInput-notchedOutline': { borderColor: ACCENT },
+                }}
+              >
+                {[12, 24, 48].map((n) => (
+                  <MenuItem key={n} value={n}>{n} / page</MenuItem>
+                ))}
               </Select>
             </FormControl>
 

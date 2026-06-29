@@ -25,6 +25,7 @@ import InventoryIcon from '@mui/icons-material/Inventory';
 import ShoppingBagIcon from '@mui/icons-material/ShoppingBag';
 import PeopleIcon from '@mui/icons-material/People';
 import LocalOfferIcon from '@mui/icons-material/LocalOffer';
+import CategoryIcon from '@mui/icons-material/Category';
 import LogoutIcon from '@mui/icons-material/Logout';
 import StorefrontIcon from '@mui/icons-material/Storefront';
 import { getStoredUser, setAccessToken, setStoredUser, api } from '@/lib/api';
@@ -51,6 +52,7 @@ const theme = createTheme({
 const navItems = [
   { label: 'Dashboard', href: '/admin', icon: <DashboardIcon fontSize="small" /> },
   { label: 'Products', href: '/admin/products', icon: <InventoryIcon fontSize="small" /> },
+  { label: 'Categories', href: '/admin/categories', icon: <CategoryIcon fontSize="small" /> },
   { label: 'Orders', href: '/admin/orders', icon: <ShoppingBagIcon fontSize="small" /> },
   { label: 'Offers', href: '/admin/offers', icon: <LocalOfferIcon fontSize="small" /> },
   { label: 'Customers', href: '/admin/customers', icon: <PeopleIcon fontSize="small" /> },

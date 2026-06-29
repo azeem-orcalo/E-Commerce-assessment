@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { usePathname, useSearchParams } from 'next/navigation';
+import { usePathname, useSearchParams, useRouter } from 'next/navigation';
 import {
   AppBar,
   Toolbar,
@@ -14,9 +14,11 @@ import {
   Badge,
 } from '@mui/material';
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
+import FavoriteIcon from '@mui/icons-material/Favorite';
 import MenuIcon from '@mui/icons-material/Menu';
 import { type AuthUser } from '@/components/AuthModals';
 import { useCart } from '@/lib/CartContext';
+import { useFavorites } from '@/lib/useFavorites';
 
 const ACCENT = '#f7444e';
 const NAVY = '#002c3e';
@@ -39,7 +41,9 @@ interface NavbarProps {
 export default function Navbar({ currentUser, onSignIn, onSignUp, onLogout }: NavbarProps) {
   const pathname = usePathname();
   const searchParams = useSearchParams();
+  const router = useRouter();
   const { itemCount, openCart } = useCart();
+  const { favorites } = useFavorites();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const isActive = (href: string) => {
@@ -102,8 +106,34 @@ export default function Navbar({ currentUser, onSignIn, onSignUp, onLogout }: Na
             ))}
           </Box>
 
-          {/* Right: cart + auth */}
+          {/* Right: favorites + cart + auth */}
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+            {/* Favorites */}
+            <IconButton
+              aria-label="View wishlist"
+              onClick={() => currentUser ? router.push('/favorites') : onSignIn()}
+              sx={{ color: 'rgba(255,255,255,0.85)', '&:hover': { color: ACCENT } }}
+            >
+              <Badge
+                badgeContent={favorites.length > 0 ? favorites.length : undefined}
+                max={99}
+                sx={{
+                  '& .MuiBadge-badge': {
+                    bgcolor: ACCENT,
+                    color: '#fff',
+                    fontWeight: 800,
+                    fontSize: '0.68rem',
+                    minWidth: 18,
+                    height: 18,
+                    padding: '0 4px',
+                  },
+                }}
+              >
+                <FavoriteIcon sx={{ fontSize: 22 }} />
+              </Badge>
+            </IconButton>
+
+            {/* Cart */}
             <IconButton
               onClick={openCart}
               aria-label="Open cart"

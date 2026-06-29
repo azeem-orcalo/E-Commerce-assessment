@@ -53,7 +53,6 @@ let OffersService = class OffersService {
         return this.prisma.offer.findMany({
             where: {
                 isActive: true,
-                startDate: { lte: now },
                 endDate: { gte: now },
             },
             orderBy: { startDate: 'asc' },

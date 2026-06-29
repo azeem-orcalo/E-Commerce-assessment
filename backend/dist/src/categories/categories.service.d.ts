@@ -6,4 +6,16 @@ export declare class CategoriesService {
         id: string;
         name: string;
     }[]>;
+    create(name: string): Promise<{
+        id: string;
+        name: string;
+    }>;
+    update(id: string, name: string): Promise<{
+        id: string;
+        name: string;
+    }>;
+    remove(id: string): Promise<{
+        message: string;
+    }>;
+    private findOneOrFail;
 }

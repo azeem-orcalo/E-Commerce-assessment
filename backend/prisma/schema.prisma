@@ -133,6 +133,9 @@ model Order {
   user        User          @relation(fields: [userId], references: [id])
   status      OrderStatus   @default(PENDING)
   totalAmount Decimal       @db.Decimal(10, 2)
+  originalAmount Decimal?   @db.Decimal(10, 2) // subtotal before discount; null = no offer applied
+  discountPercent Decimal?  @db.Decimal(5, 2)  // offer discount % applied at checkout
+  discountAmount  Decimal?  @db.Decimal(10, 2) // absolute amount saved
   paymentMethod             PaymentMethod @default(COD)
   stripePaymentIntentId     String?
   items       OrderItem[]

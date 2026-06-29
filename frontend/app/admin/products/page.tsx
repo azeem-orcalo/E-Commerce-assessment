@@ -101,7 +101,7 @@ export default function AdminProductsPage() {
   const [error, setError]         = useState<string | null>(null);
   const [search, setSearch]       = useState('');
   const [page, setPage]           = useState(0);
-  const [rowsPerPage]             = useState(10);
+  const [rowsPerPage, setRowsPerPage] = useState(10);
   const [total, setTotal]         = useState(0);
 
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -388,7 +388,9 @@ export default function AdminProductsPage() {
           page={page}
           rowsPerPage={rowsPerPage}
           onPageChange={(_, p) => setPage(p)}
-          rowsPerPageOptions={[10]}
+          onRowsPerPageChange={(e) => { setRowsPerPage(parseInt(e.target.value, 10)); setPage(0); }}
+          rowsPerPageOptions={[10, 25, 50]}
+          labelRowsPerPage="Per page:"
           sx={{ borderTop: '1px solid rgba(0,0,0,0.07)', '.MuiTablePagination-toolbar': { px: 2.5 } }}
         />
       </Paper>

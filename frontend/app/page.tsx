@@ -78,6 +78,17 @@ function fmtDate(iso: string) {
   return new Date(iso).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
 }
 
+function getOfferStatus(startDate: string, endDate: string): { label: string; color: string; bg: string } {
+  const now = Date.now();
+  const start = new Date(startDate).getTime();
+  const end = new Date(endDate).getTime();
+  const daysLeft = Math.ceil((end - now) / (1000 * 60 * 60 * 24));
+  if (now < start) return { label: 'Upcoming', color: '#3b82f6', bg: 'rgba(59,130,246,0.18)' };
+  if (now > end) return { label: 'Expired', color: '#ef4444', bg: 'rgba(239,68,68,0.18)' };
+  if (daysLeft <= 3) return { label: 'Ending Soon', color: '#f59e0b', bg: 'rgba(245,158,11,0.18)' };
+  return { label: 'Active', color: '#10b981', bg: 'rgba(16,185,129,0.18)' };
+}
+
 const newArrivalImages = [
   'https://images.unsplash.com/photo-1509631179647-0177331693ae?w=300&h=380&fit=crop',
   'https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=300&h=380&fit=crop',
@@ -208,6 +219,26 @@ export default function Home() {
               {/* ── Slide content ── */}
               <Container maxWidth="xl" sx={{ position: 'relative', zIndex: 1, height: '100%', display: 'flex', alignItems: 'center', pb: { xs: '60px', md: '80px' } }}>
                 <Box sx={{ maxWidth: { xs: '100%', md: 660 } }}>
+
+                  {/* Status badge */}
+                  {offer && (() => {
+                    const status = getOfferStatus(offer.startDate, offer.endDate);
+                    return (
+                      <Box
+                        sx={{
+                          display: 'inline-flex', alignItems: 'center', gap: 0.8,
+                          bgcolor: status.bg,
+                          border: `1px solid ${status.color}55`,
+                          borderRadius: '20px', px: 1.6, py: 0.45, mb: 2,
+                        }}
+                      >
+                        <Box sx={{ width: 7, height: 7, borderRadius: '50%', bgcolor: status.color, flexShrink: 0 }} />
+                        <Typography sx={{ color: status.color, fontSize: '0.75rem', fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase' }}>
+                          {status.label}
+                        </Typography>
+                      </Box>
+                    );
+                  })()}
 
                   <Typography
                     variant="overline"

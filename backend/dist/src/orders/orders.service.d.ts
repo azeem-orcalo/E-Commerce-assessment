@@ -10,6 +10,10 @@ export declare class OrdersService {
         orderId: string;
         status: import(".prisma/client").$Enums.OrderStatus;
         paymentMethod: import(".prisma/client").$Enums.PaymentMethod;
+        originalAmount: string | null;
+        discountPercent: number | null;
+        discountAmount: string | null;
+        offerTitle: string | null;
         totalAmount: string;
         items: ({
             product: {
@@ -44,11 +48,14 @@ export declare class OrdersService {
         })[];
     } & {
         id: string;
-        createdAt: Date;
-        updatedAt: Date;
         userId: string;
+        updatedAt: Date;
+        createdAt: Date;
         status: import(".prisma/client").$Enums.OrderStatus;
         totalAmount: import("@prisma/client-runtime-utils").Decimal;
+        originalAmount: import("@prisma/client-runtime-utils").Decimal | null;
+        discountPercent: import("@prisma/client-runtime-utils").Decimal | null;
+        discountAmount: import("@prisma/client-runtime-utils").Decimal | null;
         paymentMethod: import(".prisma/client").$Enums.PaymentMethod;
         stripePaymentIntentId: string | null;
     })[]>;
@@ -69,11 +76,14 @@ export declare class OrdersService {
         })[];
     } & {
         id: string;
-        createdAt: Date;
-        updatedAt: Date;
         userId: string;
+        updatedAt: Date;
+        createdAt: Date;
         status: import(".prisma/client").$Enums.OrderStatus;
         totalAmount: import("@prisma/client-runtime-utils").Decimal;
+        originalAmount: import("@prisma/client-runtime-utils").Decimal | null;
+        discountPercent: import("@prisma/client-runtime-utils").Decimal | null;
+        discountAmount: import("@prisma/client-runtime-utils").Decimal | null;
         paymentMethod: import(".prisma/client").$Enums.PaymentMethod;
         stripePaymentIntentId: string | null;
     }>;

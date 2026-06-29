@@ -69,8 +69,8 @@ api.interceptors.response.use(
       } catch {
         setAccessToken(null);
         setStoredUser(null);
-        if (typeof window !== 'undefined' && window.location.pathname !== '/login') {
-          window.location.href = '/login';
+        if (typeof window !== 'undefined') {
+          window.location.href = '/';
         }
       }
     }
@@ -170,6 +170,9 @@ export const productsApi = {
 
 export const categoriesApi = {
   list: () => api.get<Category[]>('/categories'),
+  create: (name: string) => api.post<Category>('/categories', { name }),
+  update: (id: string, name: string) => api.patch<Category>(`/categories/${id}`, { name }),
+  delete: (id: string) => api.delete(`/categories/${id}`),
 };
 
 // ─── Favorites ───────────────────────────────────────────────────────────────

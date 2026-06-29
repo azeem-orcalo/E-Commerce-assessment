@@ -34,7 +34,7 @@ export class OrdersService {
       throw new BadRequestException('Cart is empty');
     }
 
-    let totalAmount = 0;
+    let originalAmount = 0;
     for (const item of cart.items) {
       if (item.product.deletedAt) {
         throw new NotFoundException(`Product "${item.product.name}" is no longer available`);
@@ -45,13 +45,34 @@ export class OrdersService {
           HttpStatus.UNPROCESSABLE_ENTITY,
         );
       }
-      totalAmount += Number(item.product.price) * item.quantity;
+      originalAmount += Number(item.product.price) * item.quantity;
     }
 
-    if (dto.paymentMethod === PaymentMethod.CARD) {
-      return this.checkoutWithCard(userId, cart, totalAmount);
+    // Fetch the first currently-active offer (if any)
+    const now = new Date();
+    const activeOffer = await this.prisma.offer.findFirst({
+      where: { isActive: true, startDate: { lte: now }, endDate: { gte: now } },
+      orderBy: { endDate: 'asc' },
+    });
+
+    let discountPercent = 0;
+    let discountAmount = 0;
+    let totalAmount = originalAmount;
+
+    if (activeOffer) {
+      discountPercent = Number(activeOffer.discountPercent);
+      discountAmount = parseFloat((originalAmount * discountPercent / 100).toFixed(2));
+      totalAmount = parseFloat((originalAmount - discountAmount).toFixed(2));
     }
-    return this.checkoutWithCod(userId, cart, totalAmount);
+
+    const discountInfo = activeOffer
+      ? { discountPercent, discountAmount, originalAmount, offerTitle: activeOffer.title }
+      : null;
+
+    if (dto.paymentMethod === PaymentMethod.CARD) {
+      return this.checkoutWithCard(userId, cart, originalAmount, totalAmount, discountInfo);
+    }
+    return this.checkoutWithCod(userId, cart, originalAmount, totalAmount, discountInfo);
   }
 
   private async checkoutWithCod(
@@ -59,7 +80,9 @@ export class OrdersService {
     cart: Awaited<ReturnType<typeof this.prisma.cart.findUnique>> & {
       items: Array<{ productId: string; quantity: number; product: { price: unknown } }>;
     },
+    originalAmount: number,
     totalAmount: number,
+    discountInfo: { discountPercent: number; discountAmount: number; originalAmount: number; offerTitle: string } | null,
   ) {
     const order = await this.prisma.$transaction(async (tx) => {
       for (const item of cart!.items) {
@@ -75,6 +98,9 @@ export class OrdersService {
           status: 'PENDING',
           paymentMethod: PaymentMethod.COD,
           totalAmount,
+          originalAmount: discountInfo ? originalAmount : null,
+          discountPercent: discountInfo ? discountInfo.discountPercent : null,
+          discountAmount: discountInfo ? discountInfo.discountAmount : null,
           items: {
             create: cart!.items.map((item) => ({
               productId: item.productId,
@@ -94,6 +120,10 @@ export class OrdersService {
       orderId: order.id,
       status: order.status,
       paymentMethod: order.paymentMethod,
+      originalAmount: discountInfo ? originalAmount.toFixed(2) : null,
+      discountPercent: discountInfo ? discountInfo.discountPercent : null,
+      discountAmount: discountInfo ? discountInfo.discountAmount.toFixed(2) : null,
+      offerTitle: discountInfo ? discountInfo.offerTitle : null,
       totalAmount: order.totalAmount.toString(),
       items: order.items,
     };
@@ -104,7 +134,9 @@ export class OrdersService {
     cart: Awaited<ReturnType<typeof this.prisma.cart.findUnique>> & {
       items: Array<{ productId: string; quantity: number; product: { price: unknown } }>;
     },
+    originalAmount: number,
     totalAmount: number,
+    discountInfo: { discountPercent: number; discountAmount: number; originalAmount: number; offerTitle: string } | null,
   ) {
     if (!this.stripe) {
       throw new ServiceUnavailableException('Stripe is not configured on this server');
@@ -132,6 +164,9 @@ export class OrdersService {
           paymentMethod: PaymentMethod.CARD,
           stripePaymentIntentId: paymentIntent.id,
           totalAmount,
+          originalAmount: discountInfo ? originalAmount : null,
+          discountPercent: discountInfo ? discountInfo.discountPercent : null,
+          discountAmount: discountInfo ? discountInfo.discountAmount : null,
           items: {
             create: cart!.items.map((item) => ({
               productId: item.productId,
@@ -152,6 +187,10 @@ export class OrdersService {
       clientSecret: paymentIntent.client_secret,
       status: order.status,
       paymentMethod: order.paymentMethod,
+      originalAmount: discountInfo ? originalAmount.toFixed(2) : null,
+      discountPercent: discountInfo ? discountInfo.discountPercent : null,
+      discountAmount: discountInfo ? discountInfo.discountAmount.toFixed(2) : null,
+      offerTitle: discountInfo ? discountInfo.offerTitle : null,
       totalAmount: order.totalAmount.toString(),
       items: order.items,
     };

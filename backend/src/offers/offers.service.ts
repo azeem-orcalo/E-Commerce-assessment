@@ -45,13 +45,12 @@ export class OffersService {
     });
   }
 
-  /** Active offers whose date window is current — for customer storefront */
+  /** Active + upcoming offers — for customer storefront */
   async findActive() {
     const now = new Date();
     return this.prisma.offer.findMany({
       where: {
         isActive: true,
-        startDate: { lte: now },
         endDate: { gte: now },
       },
       orderBy: { startDate: 'asc' },
