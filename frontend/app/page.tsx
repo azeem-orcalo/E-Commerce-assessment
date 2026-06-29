@@ -247,17 +247,25 @@ export default function Home() {
       <Box
         sx={{
           minHeight: { xs: 'auto', md: '88vh' },
-          bgcolor: '#fff',
           position: 'relative',
           overflow: 'hidden',
           display: 'flex',
           alignItems: 'center',
+          clipPath: 'polygon(0 0, 100% 0, 100% 90%, 0 100%)',
+          pb: { xs: '80px', md: '120px' },
         }}
       >
-        {/* Decorative blobs */}
-        <Box sx={{ position: 'absolute', top: -120, right: -120, width: 560, height: 560, borderRadius: '50%', bgcolor: 'rgba(247,68,78,0.045)', pointerEvents: 'none' }} />
-        <Box sx={{ position: 'absolute', bottom: -160, left: -100, width: 480, height: 480, borderRadius: '50%', bgcolor: 'rgba(0,44,62,0.035)', pointerEvents: 'none' }} />
-        <Box sx={{ position: 'absolute', inset: 0, backgroundImage: 'radial-gradient(rgba(0,44,62,0.07) 1px, transparent 1px)', backgroundSize: '28px 28px', pointerEvents: 'none' }} />
+        {/* Full-width background image */}
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src="https://images.unsplash.com/photo-1490481651871-ab68de25d43d?w=1800&h=900&fit=crop&q=85"
+          alt="Fashion collection"
+          style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center 20%', display: 'block' }}
+        />
+        {/* Dark gradient overlay — heavier on left so text is readable */}
+        <Box sx={{ position: 'absolute', inset: 0, background: 'linear-gradient(105deg, rgba(0,44,62,0.93) 0%, rgba(0,44,62,0.80) 38%, rgba(0,44,62,0.52) 65%, rgba(0,44,62,0.18) 100%)' }} />
+        {/* Dot texture */}
+        <Box sx={{ position: 'absolute', inset: 0, backgroundImage: 'radial-gradient(rgba(255,255,255,0.06) 1px, transparent 1px)', backgroundSize: '28px 28px', pointerEvents: 'none' }} />
 
         <Container maxWidth="xl" sx={{ py: { xs: 8, md: 4 }, position: 'relative', zIndex: 1 }}>
           {/* Two-column layout */}
@@ -285,12 +293,12 @@ export default function Home() {
               </Typography>
 
               <Typography
-                sx={{ fontWeight: 900, color: NAVY, lineHeight: 1.05, mb: 3.5, fontSize: { xs: '2.6rem', sm: '3.2rem', md: '5.4rem' }, letterSpacing: '-0.025em' }}
+                sx={{ fontWeight: 900, color: '#fff', lineHeight: 1.05, mb: 3.5, fontSize: { xs: '2.6rem', sm: '3.2rem', md: '5.4rem' }, letterSpacing: '-0.025em' }}
               >
                 On<br />Everything
               </Typography>
 
-              <Typography sx={{ color: '#5a6472', mb: 5, maxWidth: 460, lineHeight: 1.85, fontSize: '1.05rem' }}>
+              <Typography sx={{ color: 'rgba(255,255,255,0.75)', mb: 5, maxWidth: 460, lineHeight: 1.85, fontSize: '1.05rem' }}>
                 Discover our newest collection of premium clothing — from everyday essentials to
                 statement pieces. Crafted for comfort, designed for style. Your wardrobe upgrade
                 starts right here.
@@ -319,8 +327,8 @@ export default function Home() {
                     size="large"
                     sx={{
                       px: 5, py: 1.9, fontWeight: 600, fontSize: '1rem', textTransform: 'none',
-                      borderColor: NAVY, color: NAVY,
-                      '&:hover': { bgcolor: NAVY, color: '#fff', borderColor: NAVY },
+                      borderColor: 'rgba(255,255,255,0.55)', color: '#fff',
+                      '&:hover': { bgcolor: 'rgba(255,255,255,0.1)', color: '#fff', borderColor: '#fff' },
                     }}
                   >
                     View Collection
@@ -332,8 +340,8 @@ export default function Home() {
               <Box sx={{ mt: 7, display: 'flex', gap: { xs: 4, md: 6 } }}>
                 {[['2K+', 'Happy Customers'], ['500+', 'Products'], ['4.9★', 'Avg Rating']].map(([num, label]) => (
                   <Box key={label}>
-                    <Typography sx={{ fontWeight: 900, fontSize: '1.7rem', color: NAVY, lineHeight: 1 }}>{num}</Typography>
-                    <Typography sx={{ fontSize: '0.75rem', color: '#999', mt: 0.4, fontWeight: 500 }}>{label}</Typography>
+                    <Typography sx={{ fontWeight: 900, fontSize: '1.7rem', color: '#fff', lineHeight: 1 }}>{num}</Typography>
+                    <Typography sx={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.55)', mt: 0.4, fontWeight: 500 }}>{label}</Typography>
                   </Box>
                 ))}
               </Box>

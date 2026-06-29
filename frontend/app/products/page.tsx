@@ -35,6 +35,7 @@ import GridViewIcon from '@mui/icons-material/GridView';
 import ViewListIcon from '@mui/icons-material/ViewList';
 import StarIcon from '@mui/icons-material/Star';
 import AuthModals from '@/components/AuthModals';
+import { ALL_PRODUCTS, BADGE_COLORS } from '@/lib/products-data';
 
 const theme = createTheme({
   palette: {
@@ -49,31 +50,7 @@ const theme = createTheme({
 const ACCENT = '#f7444e';
 const NAVY = '#002c3e';
 
-const ALL_PRODUCTS = [
-  { id: 1, name: 'Classic Crew Tee', price: 29.99, category: 'Tops', rating: 4.8, reviews: 124, image: 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=500&h=600&fit=crop', badge: 'Best Seller' },
-  { id: 2, name: 'Slim Fit Chinos', price: 59.99, category: 'Bottoms', rating: 4.6, reviews: 87, image: 'https://images.unsplash.com/photo-1542272604-787c3835535d?w=500&h=600&fit=crop', badge: null },
-  { id: 3, name: 'Oxford Button-Down', price: 49.99, category: 'Shirts', rating: 4.7, reviews: 203, image: 'https://images.unsplash.com/photo-1596755094514-f87e34085b2c?w=500&h=600&fit=crop', badge: 'New' },
-  { id: 4, name: 'Floral Summer Dress', price: 69.99, category: 'Dresses', rating: 4.9, reviews: 312, image: 'https://images.unsplash.com/photo-1572804013309-59a88b7e92f1?w=500&h=600&fit=crop', badge: 'Trending' },
-  { id: 5, name: 'Leather Bomber', price: 119.99, category: 'Outerwear', rating: 4.8, reviews: 56, image: 'https://images.unsplash.com/photo-1551028719-00167b16eac5?w=500&h=600&fit=crop', badge: 'New' },
-  { id: 6, name: 'Relaxed Linen Shirt', price: 44.99, category: 'Shirts', rating: 4.5, reviews: 91, image: 'https://images.unsplash.com/photo-1589992896096-94e6e80a7e67?w=500&h=600&fit=crop', badge: null },
-  { id: 7, name: 'High-Waist Jeans', price: 74.99, category: 'Bottoms', rating: 4.7, reviews: 178, image: 'https://images.unsplash.com/photo-1541099649105-f69ad21f3246?w=500&h=600&fit=crop', badge: 'Best Seller' },
-  { id: 8, name: 'Knit Pullover Sweater', price: 64.99, category: 'Tops', rating: 4.6, reviews: 143, image: 'https://images.unsplash.com/photo-1578587018452-892bacefd3f2?w=500&h=600&fit=crop', badge: null },
-  { id: 9, name: 'Wrap Midi Dress', price: 79.99, category: 'Dresses', rating: 4.8, reviews: 267, image: 'https://images.unsplash.com/photo-1515372039744-b8f02a3ae446?w=500&h=600&fit=crop', badge: 'Trending' },
-  { id: 10, name: 'Oversized Hoodie', price: 54.99, category: 'Tops', rating: 4.9, reviews: 445, image: 'https://images.unsplash.com/photo-1556821840-3a63f15732ce?w=500&h=600&fit=crop', badge: 'Best Seller' },
-  { id: 11, name: 'Trench Coat', price: 149.99, category: 'Outerwear', rating: 4.7, reviews: 39, image: 'https://images.unsplash.com/photo-1539533113208-f6df8cc8b543?w=500&h=600&fit=crop', badge: 'New' },
-  { id: 12, name: 'Pleated Midi Skirt', price: 52.99, category: 'Bottoms', rating: 4.6, reviews: 112, image: 'https://images.unsplash.com/photo-1583496661160-fb5886a0aaaa?w=500&h=600&fit=crop', badge: null },
-  { id: 13, name: 'Satin Blouse', price: 47.99, category: 'Shirts', rating: 4.5, reviews: 76, image: 'https://images.unsplash.com/photo-1564257631407-4deb1f99d992?w=500&h=600&fit=crop', badge: null },
-  { id: 14, name: 'Velvet Blazer', price: 109.99, category: 'Outerwear', rating: 4.8, reviews: 48, image: 'https://images.unsplash.com/photo-1507679799987-c73779587ccf?w=500&h=600&fit=crop', badge: 'New' },
-  { id: 15, name: 'Boho Maxi Dress', price: 89.99, category: 'Dresses', rating: 4.7, reviews: 189, image: 'https://images.unsplash.com/photo-1496747611176-843222e1e57c?w=500&h=600&fit=crop', badge: null },
-  { id: 16, name: 'Cargo Joggers', price: 62.99, category: 'Bottoms', rating: 4.6, reviews: 234, image: 'https://images.unsplash.com/photo-1473966968600-fa801b869a1a?w=500&h=600&fit=crop', badge: 'Trending' },
-];
-
 const CATEGORIES = ['All', 'Tops', 'Bottoms', 'Shirts', 'Dresses', 'Outerwear'];
-const BADGE_COLORS: Record<string, string> = {
-  'Best Seller': '#f7444e',
-  'New': '#10b981',
-  'Trending': '#f59e0b',
-};
 
 export default function ProductsPage() {
   const [hoveredProduct, setHoveredProduct] = useState<number | null>(null);
@@ -181,60 +158,128 @@ export default function ProductsPage() {
       </AppBar>
 
       {/* ─── HERO SECTION ─── */}
-      <Box sx={{ position: 'relative', height: { xs: 340, md: 480 }, overflow: 'hidden', display: 'flex', alignItems: 'center' }}>
-        {/* Background image */}
+      <Box
+        sx={{
+          position: 'relative',
+          minHeight: { xs: 420, md: 560 },
+          pb: { xs: '80px', md: '100px' },
+          display: 'flex',
+          alignItems: 'center',
+          clipPath: 'polygon(0 0, 100% 0, 100% 85%, 50% 100%, 0 85%)',
+        }}
+      >
+        {/* Full-width background image */}
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
-          src="https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=1600&h=600&fit=crop"
-          alt="Products hero"
-          style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center 30%' }}
+          src="https://images.unsplash.com/photo-1483985988355-763728e1935b?w=1800&h=700&fit=crop&q=85"
+          alt="Fashion store"
+          style={{
+            position: 'absolute', inset: 0,
+            width: '100%', height: '100%',
+            objectFit: 'cover', objectPosition: 'center 35%',
+            display: 'block',
+          }}
         />
-        {/* Gradient overlay */}
-        <Box sx={{ position: 'absolute', inset: 0, background: `linear-gradient(105deg, ${NAVY}ee 0%, ${NAVY}99 45%, ${NAVY}55 70%, transparent 100%)` }} />
-        {/* Dot pattern */}
-        <Box sx={{ position: 'absolute', inset: 0, backgroundImage: 'radial-gradient(rgba(255,255,255,0.06) 1px, transparent 1px)', backgroundSize: '22px 22px', pointerEvents: 'none' }} />
 
-        <Container maxWidth="xl" sx={{ position: 'relative', zIndex: 1 }}>
+        {/* Dark overlay — heavier on left so text pops */}
+        <Box
+          sx={{
+            position: 'absolute', inset: 0,
+            background: `linear-gradient(105deg, rgba(0,44,62,0.93) 0%, rgba(0,44,62,0.80) 42%, rgba(0,44,62,0.48) 72%, rgba(0,44,62,0.18) 100%)`,
+          }}
+        />
+
+        {/* Dot pattern texture */}
+        <Box
+          sx={{
+            position: 'absolute', inset: 0,
+            backgroundImage: 'radial-gradient(rgba(255,255,255,0.06) 1px, transparent 1px)',
+            backgroundSize: '24px 24px',
+            pointerEvents: 'none',
+          }}
+        />
+
+        <Container maxWidth="xl" sx={{ position: 'relative', zIndex: 1, py: { xs: 7, md: 9 } }}>
           {/* Breadcrumb */}
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 3 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 3.5 }}>
             <Link href="/" style={{ textDecoration: 'none' }}>
-              <Typography sx={{ color: 'rgba(255,255,255,0.55)', fontSize: '0.85rem', fontWeight: 500, cursor: 'pointer', '&:hover': { color: ACCENT }, transition: 'color 0.2s' }}>
+              <Typography
+                sx={{
+                  color: 'rgba(255,255,255,0.5)', fontSize: '0.83rem', fontWeight: 500,
+                  cursor: 'pointer', transition: 'color 0.2s', '&:hover': { color: ACCENT },
+                }}
+              >
                 Home
               </Typography>
             </Link>
-            <Typography sx={{ color: 'rgba(255,255,255,0.3)', fontSize: '0.85rem' }}>/</Typography>
-            <Typography sx={{ color: '#fff', fontSize: '0.85rem', fontWeight: 600 }}>Products</Typography>
+            <Typography sx={{ color: 'rgba(255,255,255,0.25)', fontSize: '0.83rem' }}>/</Typography>
+            <Typography sx={{ color: 'rgba(255,255,255,0.85)', fontSize: '0.83rem', fontWeight: 600 }}>Products</Typography>
           </Box>
 
-          <Typography variant="overline" sx={{ color: ACCENT, fontWeight: 700, letterSpacing: '0.22em', fontSize: '0.82rem', display: 'block', mb: 1.5 }}>
-            ── Our Full Collection
-          </Typography>
+          {/* Overline tag */}
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 2 }}>
+            <Box sx={{ width: 32, height: 3, bgcolor: ACCENT, borderRadius: 2 }} />
+            <Typography
+              variant="overline"
+              sx={{ color: ACCENT, fontWeight: 700, letterSpacing: '0.22em', fontSize: '0.78rem' }}
+            >
+              Our Full Collection
+            </Typography>
+          </Box>
+
+          {/* Headline */}
           <Typography
-            sx={{ fontWeight: 900, color: '#fff', fontSize: { xs: '2.4rem', sm: '3.2rem', md: '4.2rem' }, lineHeight: 1.1, mb: 2.5, letterSpacing: '-0.02em' }}
+            sx={{
+              fontWeight: 900,
+              color: '#fff',
+              fontSize: { xs: '2.6rem', sm: '3.4rem', md: '5rem' },
+              lineHeight: 1.05,
+              letterSpacing: '-0.03em',
+              mb: 2.5,
+            }}
           >
-            All Products
-          </Typography>
-          <Typography sx={{ color: 'rgba(255,255,255,0.65)', fontSize: '1.05rem', maxWidth: 520, lineHeight: 1.8, mb: 4 }}>
-            {ALL_PRODUCTS.length} carefully curated pieces for every occasion — from everyday essentials to statement fashion.
+            All<br />
+            <Box component="span" sx={{ color: ACCENT }}>Products</Box>
           </Typography>
 
-          {/* Quick-stats row */}
-          <Box sx={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
+          <Typography
+            sx={{
+              color: 'rgba(255,255,255,0.6)',
+              fontSize: { xs: '0.97rem', md: '1.08rem' },
+              maxWidth: 460,
+              lineHeight: 1.85,
+              mb: 5,
+            }}
+          >
+            {ALL_PRODUCTS.length} carefully curated pieces — from everyday essentials to statement fashion. Filter, search, and find exactly what you need.
+          </Typography>
+
+          {/* Stat pills */}
+          <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
             {[
-              { icon: <LocalShippingIcon sx={{ fontSize: 18 }} />, text: 'Free shipping $50+' },
-              { icon: <StarIcon sx={{ fontSize: 18 }} />, text: '4.8 avg rating' },
-              { icon: <ShoppingCartIcon sx={{ fontSize: 18 }} />, text: '500+ products' },
+              { icon: <LocalShippingIcon sx={{ fontSize: 16 }} />, text: 'Free shipping $50+' },
+              { icon: <StarIcon sx={{ fontSize: 16 }} />, text: '4.8 avg rating' },
+              { icon: <ShoppingCartIcon sx={{ fontSize: 16 }} />, text: '500+ products' },
             ].map(({ icon, text }) => (
-              <Box key={text} sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                <Box sx={{ color: ACCENT }}>{icon}</Box>
-                <Typography sx={{ color: 'rgba(255,255,255,0.75)', fontSize: '0.87rem', fontWeight: 500 }}>{text}</Typography>
+              <Box
+                key={text}
+                sx={{
+                  display: 'flex', alignItems: 'center', gap: 1,
+                  bgcolor: 'rgba(255,255,255,0.08)',
+                  border: '1px solid rgba(255,255,255,0.12)',
+                  borderRadius: '999px',
+                  px: 2.2, py: 0.9,
+                  backdropFilter: 'blur(8px)',
+                }}
+              >
+                <Box sx={{ color: ACCENT, display: 'flex' }}>{icon}</Box>
+                <Typography sx={{ color: 'rgba(255,255,255,0.82)', fontSize: '0.83rem', fontWeight: 600 }}>
+                  {text}
+                </Typography>
               </Box>
             ))}
           </Box>
         </Container>
-
-        {/* Bottom fade */}
-        <Box sx={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: 80, background: 'linear-gradient(to top, #fff, transparent)', pointerEvents: 'none' }} />
       </Box>
 
       {/* ─── FILTER / SEARCH BAR ─── */}
@@ -381,8 +426,8 @@ export default function ProductsPage() {
             /* Grid view */
             <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr 1fr', sm: 'repeat(3, 1fr)', md: 'repeat(4, 1fr)' }, gap: { xs: 2, md: 3 } }}>
               {filteredProducts.map((product) => (
+                <Link key={product.id} href={`/products/${product.id}`} style={{ textDecoration: 'none' }}>
                 <Card
-                  key={product.id}
                   elevation={0}
                   onMouseEnter={() => setHoveredProduct(product.id)}
                   onMouseLeave={() => setHoveredProduct(null)}
@@ -468,14 +513,15 @@ export default function ProductsPage() {
                     </Button>
                   </CardActions>
                 </Card>
+                </Link>
               ))}
             </Box>
           ) : (
             /* List view */
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
               {filteredProducts.map((product) => (
+                <Link key={product.id} href={`/products/${product.id}`} style={{ textDecoration: 'none' }}>
                 <Card
-                  key={product.id}
                   elevation={0}
                   onMouseEnter={() => setHoveredProduct(product.id)}
                   onMouseLeave={() => setHoveredProduct(null)}
@@ -538,6 +584,7 @@ export default function ProductsPage() {
                     </Box>
                   </Box>
                 </Card>
+                </Link>
               ))}
             </Box>
           )}
