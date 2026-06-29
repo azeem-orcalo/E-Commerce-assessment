@@ -14,8 +14,7 @@ const PRODUCT_SELECT = {
   price: true,
   imageUrl: true,
   stock: true,
-  variants: true,
-  material: true,
+  category: { select: { id: true, name: true } },
 } as const;
 
 @Injectable()

@@ -68,7 +68,10 @@ api.interceptors.response.use(
         }
       } catch {
         setAccessToken(null);
-        if (typeof window !== 'undefined') window.location.href = '/login';
+        setStoredUser(null);
+        if (typeof window !== 'undefined' && window.location.pathname !== '/login') {
+          window.location.href = '/login';
+        }
       }
     }
     return Promise.reject(error);
@@ -191,6 +194,58 @@ export const favoritesApi = {
 
   /** List all favorited products */
   list: () => api.get<FavoritesListResponse>('/favorites'),
+};
+
+// ─── Cart ─────────────────────────────────────────────────────────────────────
+
+export interface CartItemProduct {
+  id: string;
+  name: string;
+  price: string;
+  imageUrl: string | null;
+  stock: number;
+  category: { id: string; name: string };
+}
+
+export interface CartItem {
+  id: string;
+  cartId: string;
+  productId: string;
+  quantity: number;
+  chosenColor?: string | null;
+  chosenSize?: string | null;
+  product: CartItemProduct;
+}
+
+export interface CartData {
+  id: string;
+  userId: string;
+  items: CartItem[];
+  updatedAt: string;
+}
+
+export interface CartApiResponse extends CartData {
+  total?: string;
+}
+
+export interface AddCartItemPayload {
+  productId: string;
+  quantity: number;
+  chosenColor?: string;
+  chosenSize?: string;
+}
+
+export const cartApi = {
+  get: () =>
+    api.get<CartApiResponse>('/cart'),
+  addItem: (payload: AddCartItemPayload) =>
+    api.post<CartApiResponse>('/cart/items', payload),
+  updateItem: (productId: string, quantity: number) =>
+    api.patch<CartApiResponse>(`/cart/items/${productId}`, { quantity }),
+  removeItem: (productId: string) =>
+    api.delete<CartApiResponse>(`/cart/items/${productId}`),
+  clear: () =>
+    api.delete('/cart'),
 };
 
 // ─── Utilities ───────────────────────────────────────────────────────────────

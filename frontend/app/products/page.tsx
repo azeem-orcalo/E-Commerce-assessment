@@ -25,6 +25,7 @@ import {
   FormControl,
   Slider,
   CircularProgress,
+  Badge,
 } from '@mui/material';
 import LocalShippingIcon from '@mui/icons-material/LocalShipping';
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
@@ -51,6 +52,7 @@ import {
   type ProductsQueryParams,
 } from '@/lib/api';
 import { useFavorites } from '@/lib/useFavorites';
+import { useCart } from '@/lib/CartContext';
 
 const theme = createTheme({
   palette: {
@@ -88,6 +90,7 @@ export default function ProductsPage() {
   const [showFavoritesOnly, setShowFavoritesOnly] = useState(false);
   const [currentUser, setCurrentUser] = useState<AuthUser | null>(null);
   const [pendingFavorite, setPendingFavorite] = useState<ApiProduct | null>(null);
+  const { itemCount, openCart, addItem, refreshCart, resetCartState } = useCart();
 
   const [products, setProducts] = useState<ApiProduct[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
@@ -159,6 +162,7 @@ export default function ProductsPage() {
     setCurrentUser(user);
     setStoredUser(user);
     await syncFromApi();
+    await refreshCart();
     if (pendingFavorite) {
       toggleFavorite(pendingFavorite);
       setPendingFavorite(null);
@@ -169,8 +173,20 @@ export default function ProductsPage() {
     setCurrentUser(null);
     setStoredUser(null);
     clearFavorites();
+    resetCartState();
     setAccessToken(null);
     authApi.logout().catch(() => {});
+  };
+
+  const handleAddToCart = async (e: React.MouseEvent, product: ApiProduct) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (!currentUser) {
+      setAuthModal('login');
+      return;
+    }
+    const result = await addItem({ productId: product.id, quantity: 1 });
+    if (result === 'success') openCart();
   };
 
   const handleCategorySelect = (categoryId: string) => {
@@ -233,6 +249,32 @@ export default function ProductsPage() {
             </Box>
 
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+              {/* Cart icon */}
+              <IconButton
+                onClick={openCart}
+                aria-label="Open cart"
+                sx={{ color: 'rgba(255,255,255,0.85)', '&:hover': { color: ACCENT } }}
+              >
+                <Badge
+                  badgeContent={itemCount > 0 ? itemCount : undefined}
+                  color="primary"
+                  max={99}
+                  sx={{
+                    '& .MuiBadge-badge': {
+                      bgcolor: ACCENT,
+                      color: '#fff',
+                      fontWeight: 800,
+                      fontSize: '0.68rem',
+                      minWidth: 18,
+                      height: 18,
+                      padding: '0 4px',
+                    },
+                  }}
+                >
+                  <ShoppingCartIcon sx={{ fontSize: 22 }} />
+                </Badge>
+              </IconButton>
+
               {currentUser ? (
                 <>
                   <Box sx={{ display: { xs: 'none', sm: 'flex' }, alignItems: 'center', gap: 1.2 }}>
@@ -605,6 +647,7 @@ export default function ProductsPage() {
                           size="small"
                           fullWidth
                           disabled={product.stock === 0}
+                          onClick={(e) => handleAddToCart(e, product)}
                           startIcon={<ShoppingCartIcon sx={{ fontSize: '1rem' }} />}
                           sx={{ fontWeight: 700, textTransform: 'none', py: 1.15, fontSize: '0.85rem', borderRadius: '8px', boxShadow: '0 4px 12px rgba(247,68,78,0.35)' }}
                         >
@@ -632,7 +675,7 @@ export default function ProductsPage() {
                         </Box>
                         <Box sx={{ px: { xs: 2, sm: 3 }, display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 1.5, flexShrink: 0 }}>
                           <Typography sx={{ fontWeight: 800, color: ACCENT, fontSize: { xs: '1.1rem', sm: '1.3rem' } }}>${parseFloat(product.price).toFixed(2)}</Typography>
-                          <Button variant="contained" color="primary" size="small" disabled={product.stock === 0} startIcon={<ShoppingCartIcon sx={{ fontSize: '0.9rem' }} />} sx={{ fontWeight: 700, textTransform: 'none', fontSize: '0.82rem', borderRadius: '8px', px: 2, whiteSpace: 'nowrap', boxShadow: '0 4px 12px rgba(247,68,78,0.3)' }}>
+                          <Button variant="contained" color="primary" size="small" disabled={product.stock === 0} onClick={(e) => handleAddToCart(e, product)} startIcon={<ShoppingCartIcon sx={{ fontSize: '0.9rem' }} />} sx={{ fontWeight: 700, textTransform: 'none', fontSize: '0.82rem', borderRadius: '8px', px: 2, whiteSpace: 'nowrap', boxShadow: '0 4px 12px rgba(247,68,78,0.3)' }}>
                             {product.stock === 0 ? 'Out of Stock' : 'Add to Cart'}
                           </Button>
                           <IconButton size="small" onClick={(e) => { e.preventDefault(); handleFavoriteClick(product); }} sx={{ color: ACCENT, '&:hover': { color: '#e03038' } }}>
@@ -734,6 +777,7 @@ export default function ProductsPage() {
                         size="small"
                         fullWidth
                         disabled={product.stock === 0}
+                        onClick={(e) => handleAddToCart(e, product)}
                         startIcon={<ShoppingCartIcon sx={{ fontSize: '1rem' }} />}
                         sx={{
                           fontWeight: 700, textTransform: 'none', py: 1.15, fontSize: '0.85rem', borderRadius: '8px',
@@ -805,6 +849,7 @@ export default function ProductsPage() {
                           color="primary"
                           size="small"
                           disabled={product.stock === 0}
+                          onClick={(e) => handleAddToCart(e, product)}
                           startIcon={<ShoppingCartIcon sx={{ fontSize: '0.9rem' }} />}
                           sx={{ fontWeight: 700, textTransform: 'none', fontSize: '0.82rem', borderRadius: '8px', px: 2, whiteSpace: 'nowrap', boxShadow: '0 4px 12px rgba(247,68,78,0.3)' }}
                         >

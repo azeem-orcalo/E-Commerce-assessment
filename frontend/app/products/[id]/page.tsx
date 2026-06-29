@@ -17,6 +17,7 @@ import {
   Chip,
   Divider,
   CircularProgress,
+  Badge,
 } from '@mui/material';
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
 import FavoriteIcon from '@mui/icons-material/Favorite';
@@ -33,6 +34,7 @@ import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import AuthModals, { type AuthUser } from '@/components/AuthModals';
 import { authApi, productsApi, setAccessToken, getStoredUser, setStoredUser, type ApiProduct } from '@/lib/api';
 import { useFavorites } from '@/lib/useFavorites';
+import { useCart } from '@/lib/CartContext';
 
 const theme = createTheme({
   palette: {
@@ -80,6 +82,7 @@ export default function ProductDetailPage() {
     setCurrentUser(user);
     setStoredUser(user);
     await syncFromApi();
+    await refreshCart();
     if (product) toggleFavorite(product);
   };
 
@@ -87,6 +90,7 @@ export default function ProductDetailPage() {
     setCurrentUser(null);
     setStoredUser(null);
     clearFavorites();
+    resetCartState();
     setAccessToken(null);
     authApi.logout().catch(() => {});
   };
@@ -94,6 +98,7 @@ export default function ProductDetailPage() {
   const [authModal, setAuthModal] = useState<'login' | 'signup' | null>(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [addedToCart, setAddedToCart] = useState(false);
+  const { itemCount, openCart, addItem, refreshCart, resetCartState } = useCart();
 
   // Rehydrate auth from localStorage after mount (avoids SSR/client mismatch)
   useEffect(() => {
@@ -121,9 +126,23 @@ export default function ProductDetailPage() {
       .finally(() => setLoading(false));
   }, [id]);
 
-  const handleAddToCart = () => {
-    setAddedToCart(true);
-    setTimeout(() => setAddedToCart(false), 2200);
+  const handleAddToCart = async () => {
+    if (!product) return;
+    if (!currentUser) {
+      setAuthModal('login');
+      return;
+    }
+    const result = await addItem({
+      productId: product.id,
+      quantity,
+      chosenColor: selectedColor ?? undefined,
+      chosenSize: selectedSize ?? undefined,
+    });
+    if (result === 'success') {
+      setAddedToCart(true);
+      setTimeout(() => setAddedToCart(false), 2200);
+      openCart();
+    }
   };
 
   const imageUrl = product?.imageUrl ?? PLACEHOLDER_IMG;
@@ -157,6 +176,32 @@ export default function ProductDetailPage() {
           </Box>
 
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+            {/* Cart icon */}
+            <IconButton
+              onClick={openCart}
+              aria-label="Open cart"
+              sx={{ color: 'rgba(255,255,255,0.85)', '&:hover': { color: ACCENT } }}
+            >
+              <Badge
+                badgeContent={itemCount > 0 ? itemCount : undefined}
+                color="primary"
+                max={99}
+                sx={{
+                  '& .MuiBadge-badge': {
+                    bgcolor: ACCENT,
+                    color: '#fff',
+                    fontWeight: 800,
+                    fontSize: '0.68rem',
+                    minWidth: 18,
+                    height: 18,
+                    padding: '0 4px',
+                  },
+                }}
+              >
+                <ShoppingCartIcon sx={{ fontSize: 22 }} />
+              </Badge>
+            </IconButton>
+
             {currentUser ? (
               <>
                 <Box sx={{ display: { xs: 'none', sm: 'flex' }, alignItems: 'center', gap: 1.2 }}>

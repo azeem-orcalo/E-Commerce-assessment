@@ -19,6 +19,7 @@ import {
   IconButton,
   Chip,
   Divider,
+  Badge,
 } from '@mui/material';
 import LocalShippingIcon from '@mui/icons-material/LocalShipping';
 import RedeemIcon from '@mui/icons-material/Redeem';
@@ -28,6 +29,7 @@ import FavoriteIcon from '@mui/icons-material/Favorite';
 import MenuIcon from '@mui/icons-material/Menu';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import AuthModals from '@/components/AuthModals';
+import { useCart } from '@/lib/CartContext';
 
 const theme = createTheme({
   palette: {
@@ -130,6 +132,7 @@ export default function Home() {
   const [hoveredProduct, setHoveredProduct] = useState<number | null>(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [authModal, setAuthModal] = useState<'login' | 'signup' | null>(null);
+  const { itemCount, openCart } = useCart();
 
   return (
     <ThemeProvider theme={theme}>
@@ -175,8 +178,34 @@ export default function Home() {
               ))}
             </Box>
 
-            {/* Auth buttons */}
+            {/* Auth buttons + cart */}
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+              {/* Cart icon */}
+              <IconButton
+                onClick={openCart}
+                aria-label="Open cart"
+                sx={{ color: 'rgba(255,255,255,0.85)', '&:hover': { color: ACCENT } }}
+              >
+                <Badge
+                  badgeContent={itemCount > 0 ? itemCount : undefined}
+                  color="primary"
+                  max={99}
+                  sx={{
+                    '& .MuiBadge-badge': {
+                      bgcolor: ACCENT,
+                      color: '#fff',
+                      fontWeight: 800,
+                      fontSize: '0.68rem',
+                      minWidth: 18,
+                      height: 18,
+                      padding: '0 4px',
+                    },
+                  }}
+                >
+                  <ShoppingCartIcon sx={{ fontSize: 22 }} />
+                </Badge>
+              </IconButton>
+
               <Button
                 variant="outlined"
                 onClick={() => setAuthModal('login')}
@@ -618,6 +647,7 @@ export default function Home() {
                     color="primary"
                     size="small"
                     fullWidth
+                    onClick={() => openCart()}
                     startIcon={<ShoppingCartIcon sx={{ fontSize: '1rem' }} />}
                     sx={{
                       fontWeight: 700, textTransform: 'none', py: 1.1, fontSize: '0.85rem', borderRadius: '6px',

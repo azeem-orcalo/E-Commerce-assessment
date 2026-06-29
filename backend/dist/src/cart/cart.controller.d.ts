@@ -16,20 +16,22 @@ export declare class CartController {
                 price: import("@prisma/client-runtime-utils").Decimal;
                 imageUrl: string | null;
                 stock: number;
-                material: string | null;
-                variants: import("@prisma/client/runtime/client").JsonValue;
+                category: {
+                    id: string;
+                    name: string;
+                };
             };
         } & {
             id: string;
+            cartId: string;
             productId: string;
             quantity: number;
             chosenColor: string;
             chosenSize: string;
-            cartId: string;
         })[];
         id: string;
-        updatedAt: Date;
         userId: string;
+        updatedAt: Date;
     }>;
     addItem(userId: string, dto: AddCartItemDto): Promise<{
         product: {
@@ -38,16 +40,18 @@ export declare class CartController {
             price: import("@prisma/client-runtime-utils").Decimal;
             imageUrl: string | null;
             stock: number;
-            material: string | null;
-            variants: import("@prisma/client/runtime/client").JsonValue;
+            category: {
+                id: string;
+                name: string;
+            };
         };
     } & {
         id: string;
+        cartId: string;
         productId: string;
         quantity: number;
         chosenColor: string;
         chosenSize: string;
-        cartId: string;
     }>;
     updateItem(userId: string, itemId: string, dto: UpdateCartItemDto): Promise<({
         product: {
@@ -56,16 +60,18 @@ export declare class CartController {
             price: import("@prisma/client-runtime-utils").Decimal;
             imageUrl: string | null;
             stock: number;
-            material: string | null;
-            variants: import("@prisma/client/runtime/client").JsonValue;
+            category: {
+                id: string;
+                name: string;
+            };
         };
     } & {
         id: string;
+        cartId: string;
         productId: string;
         quantity: number;
         chosenColor: string;
         chosenSize: string;
-        cartId: string;
     }) | {
         deleted: boolean;
     }>;
