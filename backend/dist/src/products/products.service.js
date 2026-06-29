@@ -49,6 +49,42 @@ let ProductsService = class ProductsService {
             meta: { page, limit, total, totalPages: Math.ceil(total / limit) },
         };
     }
+    async create(dto) {
+        return this.prisma.product.create({
+            data: {
+                name: dto.name,
+                description: dto.description,
+                price: new client_1.Prisma.Decimal(dto.price),
+                stock: dto.stock,
+                categoryId: dto.categoryId,
+                imageUrl: dto.imageUrl,
+            },
+            include: { category: { select: { id: true, name: true } } },
+        });
+    }
+    async update(id, dto) {
+        await this.findOne(id);
+        return this.prisma.product.update({
+            where: { id },
+            data: {
+                ...(dto.name !== undefined && { name: dto.name }),
+                ...(dto.description !== undefined && { description: dto.description }),
+                ...(dto.price !== undefined && { price: new client_1.Prisma.Decimal(dto.price) }),
+                ...(dto.stock !== undefined && { stock: dto.stock }),
+                ...(dto.categoryId !== undefined && { categoryId: dto.categoryId }),
+                ...(dto.imageUrl !== undefined && { imageUrl: dto.imageUrl }),
+            },
+            include: { category: { select: { id: true, name: true } } },
+        });
+    }
+    async remove(id) {
+        await this.findOne(id);
+        await this.prisma.product.update({
+            where: { id },
+            data: { deletedAt: new Date() },
+        });
+        return { message: 'Product deleted.' };
+    }
     async findOne(id) {
         const product = await this.prisma.product.findFirst({
             where: { id, deletedAt: null },

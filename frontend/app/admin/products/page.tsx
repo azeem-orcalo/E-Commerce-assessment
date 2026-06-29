@@ -54,7 +54,6 @@ interface ProductForm {
   stock: string;
   categoryId: string;
   imageUrl: string;
-  variants: string;
 }
 
 const emptyForm: ProductForm = {
@@ -64,7 +63,6 @@ const emptyForm: ProductForm = {
   stock: '',
   categoryId: '',
   imageUrl: '',
-  variants: '',
 };
 
 function FormField({
@@ -158,7 +156,6 @@ export default function AdminProductsPage() {
       stock:       String(product.stock),
       categoryId:  product.categoryId,
       imageUrl:    product.imageUrl ?? '',
-      variants:    '',
     });
     setFormError(null);
     setDialogOpen(true);
@@ -170,8 +167,8 @@ export default function AdminProductsPage() {
 
   const handleSave = async () => {
     setFormError(null);
-    if (!form.name.trim() || !form.price || !form.stock || !form.categoryId) {
-      setFormError('Name, price, stock, and category are required.');
+    if (!form.name.trim() || !form.description.trim() || !form.price || !form.stock || !form.categoryId) {
+      setFormError('Name, description, price, stock, and category are required.');
       return;
     }
     const price = parseFloat(form.price);
@@ -185,11 +182,8 @@ export default function AdminProductsPage() {
       price,
       stock,
       categoryId:  form.categoryId,
-      imageUrl:    form.imageUrl.trim() || null,
+      ...(form.imageUrl.trim() ? { imageUrl: form.imageUrl.trim() } : {}),
     };
-    if (form.variants.trim()) {
-      try { payload.variants = JSON.parse(form.variants); } catch { setFormError('Variants must be valid JSON.'); return; }
-    }
 
     setSaving(true);
     try {
@@ -414,7 +408,7 @@ export default function AdminProductsPage() {
           {formError && <Alert severity="error" sx={{ borderRadius: '8px' }}>{formError}</Alert>}
 
           <FormField label="Product Name *" name="name" value={form.name} onChange={handleFormChange} />
-          <FormField label="Description" name="description" value={form.description} onChange={handleFormChange} multiline rows={3} />
+          <FormField label="Description *" name="description" value={form.description} onChange={handleFormChange} multiline rows={3} />
 
           <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 2 }}>
             <FormField label="Price ($) *" name="price" value={form.price} onChange={handleFormChange} type="number" />
@@ -441,16 +435,6 @@ export default function AdminProductsPage() {
             value={form.imageUrl}
             onChange={handleFormChange}
             helperText="Paste a publicly accessible image URL"
-          />
-
-          <FormField
-            label="Variants (JSON)"
-            name="variants"
-            value={form.variants}
-            onChange={handleFormChange}
-            multiline
-            rows={3}
-            helperText='e.g. [{"size":"M","color":"Red","stock":10}]'
           />
         </DialogContent>
         <DialogActions sx={{ px: 3, py: 2, gap: 1 }}>
