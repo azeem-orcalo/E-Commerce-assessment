@@ -111,7 +111,48 @@ let OrdersService = class OrdersService {
     }
     async checkoutWithCard(userId, cart, originalAmount, totalAmount, discountInfo) {
         if (!this.stripe) {
-            throw new common_1.ServiceUnavailableException('Stripe is not configured on this server');
+            const order = await this.prisma.$transaction(async (tx) => {
+                for (const item of cart.items) {
+                    await tx.product.update({
+                        where: { id: item.productId },
+                        data: { stock: { decrement: item.quantity } },
+                    });
+                }
+                const created = await tx.order.create({
+                    data: {
+                        userId,
+                        status: 'PENDING',
+                        paymentMethod: client_1.PaymentMethod.CARD,
+                        stripePaymentIntentId: null,
+                        totalAmount,
+                        originalAmount: discountInfo ? originalAmount : null,
+                        discountPercent: discountInfo ? discountInfo.discountPercent : null,
+                        discountAmount: discountInfo ? discountInfo.discountAmount : null,
+                        items: {
+                            create: cart.items.map((item) => ({
+                                productId: item.productId,
+                                quantity: item.quantity,
+                                priceAtPurchase: item.product.price,
+                            })),
+                        },
+                    },
+                    include: { items: { include: { product: { select: { id: true, name: true, imageUrl: true } } } } },
+                });
+                await tx.cartItem.deleteMany({ where: { cartId: cart.id } });
+                return created;
+            });
+            return {
+                orderId: order.id,
+                clientSecret: 'mock_client_secret',
+                status: order.status,
+                paymentMethod: order.paymentMethod,
+                originalAmount: discountInfo ? originalAmount.toFixed(2) : null,
+                discountPercent: discountInfo ? discountInfo.discountPercent : null,
+                discountAmount: discountInfo ? discountInfo.discountAmount.toFixed(2) : null,
+                offerTitle: discountInfo ? discountInfo.offerTitle : null,
+                totalAmount: order.totalAmount.toString(),
+                items: order.items,
+            };
         }
         const amountInCents = Math.round(totalAmount * 100);
         const paymentIntent = await this.stripe.paymentIntents.create({

@@ -233,7 +233,7 @@ export default function ProductsPage() {
           pb: { xs: '80px', md: '100px' },
           display: 'flex',
           alignItems: 'center',
-          clipPath: 'polygon(0 0, 100% 0, 100% 85%, 50% 100%, 0 85%)',
+          clipPath: 'polygon(0 0, 100% 0, 100% 100%, 0 88%)',
         }}
       >
         {/* eslint-disable-next-line @next/next/no-img-element */}

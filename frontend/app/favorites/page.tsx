@@ -100,43 +100,73 @@ export default function FavoritesPage() {
         onLogout={handleLogout}
       />
 
-      {/* Hero */}
+      {/* ─── HERO SECTION ─── */}
       <Box
         sx={{
-          background: `linear-gradient(135deg, ${NAVY} 0%, #004a6e 100%)`,
-          py: { xs: 5, md: 7 },
-          textAlign: 'center',
+          position: 'relative',
+          minHeight: { xs: 420, md: 540 },
+          pb: { xs: '80px', md: '100px' },
+          display: 'flex',
+          alignItems: 'center',
+          clipPath: 'polygon(0 0, 100% 0, 100% 100%, 0 88%)',
         }}
       >
-        <Box
-          sx={{
-            width: 64,
-            height: 64,
-            borderRadius: '50%',
-            bgcolor: 'rgba(247,68,78,0.18)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            mx: 'auto',
-            mb: 2,
-          }}
-        >
-          <FavoriteIcon sx={{ fontSize: 32, color: ACCENT }} />
-        </Box>
-        <Typography
-          variant="h3"
-          sx={{ fontWeight: 900, color: '#fff', mb: 1, fontSize: { xs: '1.8rem', md: '2.4rem' } }}
-        >
-          My{' '}
-          <Box component="span" sx={{ color: ACCENT }}>
-            Wishlist
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src="https://images.unsplash.com/photo-1558769132-cb1aea458c5e?w=1800&h=700&fit=crop&q=85"
+          alt="Wishlist"
+          style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center 35%', display: 'block' }}
+        />
+        <Box sx={{ position: 'absolute', inset: 0, background: `linear-gradient(105deg, rgba(0,44,62,0.96) 0%, rgba(0,44,62,0.82) 42%, rgba(0,44,62,0.52) 72%, rgba(0,44,62,0.22) 100%)` }} />
+        <Box sx={{ position: 'absolute', inset: 0, backgroundImage: 'radial-gradient(rgba(255,255,255,0.06) 1px, transparent 1px)', backgroundSize: '24px 24px', pointerEvents: 'none' }} />
+
+        <Container maxWidth="xl" sx={{ position: 'relative', zIndex: 1, py: { xs: 7, md: 9 } }}>
+          {/* Breadcrumb */}
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 3.5 }}>
+            <Link href="/" style={{ textDecoration: 'none' }}>
+              <Typography sx={{ color: 'rgba(255,255,255,0.5)', fontSize: '0.83rem', fontWeight: 500, cursor: 'pointer', transition: 'color 0.2s', '&:hover': { color: ACCENT } }}>
+                Home
+              </Typography>
+            </Link>
+            <Typography sx={{ color: 'rgba(255,255,255,0.25)', fontSize: '0.83rem' }}>/</Typography>
+            <Typography sx={{ color: 'rgba(255,255,255,0.85)', fontSize: '0.83rem', fontWeight: 600 }}>Wishlist</Typography>
           </Box>
-        </Typography>
-        <Typography sx={{ color: 'rgba(255,255,255,0.65)', fontSize: '0.95rem' }}>
-          {favorites.length === 0
-            ? 'No saved items yet'
-            : `${favorites.length} saved item${favorites.length !== 1 ? 's' : ''}`}
-        </Typography>
+
+          {/* Overline */}
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 2 }}>
+            <Box sx={{ width: 32, height: 3, bgcolor: ACCENT, borderRadius: 2 }} />
+            <Typography variant="overline" sx={{ color: ACCENT, fontWeight: 700, letterSpacing: '0.22em', fontSize: '0.78rem' }}>
+              Your Saved Items
+            </Typography>
+          </Box>
+
+          {/* Title */}
+          <Typography sx={{ fontWeight: 900, color: '#fff', fontSize: { xs: '2.6rem', sm: '3.4rem', md: '5rem' }, lineHeight: 1.05, letterSpacing: '-0.03em', mb: 2.5 }}>
+            My<br />
+            <Box component="span" sx={{ color: ACCENT }}>Wishlist</Box>
+          </Typography>
+
+          {/* Subtitle */}
+          <Typography sx={{ color: 'rgba(255,255,255,0.6)', fontSize: { xs: '0.97rem', md: '1.08rem' }, maxWidth: 460, lineHeight: 1.85, mb: 5 }}>
+            {favorites.length === 0
+              ? 'Save your favourite pieces here — they\'ll be waiting whenever you\'re ready.'
+              : `${favorites.length} saved item${favorites.length !== 1 ? 's' : ''} — ready to add to your cart.`}
+          </Typography>
+
+          {/* Badges */}
+          <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
+            {[
+              { icon: <FavoriteIcon sx={{ fontSize: 16 }} />, text: 'Saved across sessions' },
+              { icon: <ShoppingCartIcon sx={{ fontSize: 16 }} />, text: 'One-click add to cart' },
+              { icon: <ArrowForwardIcon sx={{ fontSize: 16 }} />, text: 'Quick checkout' },
+            ].map(({ icon, text }) => (
+              <Box key={text} sx={{ display: 'flex', alignItems: 'center', gap: 1, bgcolor: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.12)', borderRadius: '999px', px: 2.2, py: 0.9, backdropFilter: 'blur(8px)' }}>
+                <Box sx={{ color: ACCENT, display: 'flex' }}>{icon}</Box>
+                <Typography sx={{ color: 'rgba(255,255,255,0.82)', fontSize: '0.83rem', fontWeight: 600 }}>{text}</Typography>
+              </Box>
+            ))}
+          </Box>
+        </Container>
       </Box>
 
       <Container maxWidth="xl" sx={{ py: { xs: 5, md: 7 } }}>

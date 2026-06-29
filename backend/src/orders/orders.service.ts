@@ -4,7 +4,6 @@ import {
   HttpStatus,
   Injectable,
   NotFoundException,
-  ServiceUnavailableException,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PaymentMethod } from '@prisma/client';
@@ -138,8 +137,54 @@ export class OrdersService {
     totalAmount: number,
     discountInfo: { discountPercent: number; discountAmount: number; originalAmount: number; offerTitle: string } | null,
   ) {
+    // When Stripe is not configured fall back to a mock payment so the checkout
+    // flow still works end-to-end in development / test environments.
     if (!this.stripe) {
-      throw new ServiceUnavailableException('Stripe is not configured on this server');
+      const order = await this.prisma.$transaction(async (tx) => {
+        for (const item of cart!.items) {
+          await tx.product.update({
+            where: { id: item.productId },
+            data: { stock: { decrement: item.quantity } },
+          });
+        }
+
+        const created = await tx.order.create({
+          data: {
+            userId,
+            status: 'PENDING',
+            paymentMethod: PaymentMethod.CARD,
+            stripePaymentIntentId: null,
+            totalAmount,
+            originalAmount: discountInfo ? originalAmount : null,
+            discountPercent: discountInfo ? discountInfo.discountPercent : null,
+            discountAmount: discountInfo ? discountInfo.discountAmount : null,
+            items: {
+              create: cart!.items.map((item) => ({
+                productId: item.productId,
+                quantity: item.quantity,
+                priceAtPurchase: item.product.price as number,
+              })),
+            },
+          },
+          include: { items: { include: { product: { select: { id: true, name: true, imageUrl: true } } } } },
+        });
+
+        await tx.cartItem.deleteMany({ where: { cartId: cart!.id } });
+        return created;
+      });
+
+      return {
+        orderId: order.id,
+        clientSecret: 'mock_client_secret',
+        status: order.status,
+        paymentMethod: order.paymentMethod,
+        originalAmount: discountInfo ? originalAmount.toFixed(2) : null,
+        discountPercent: discountInfo ? discountInfo.discountPercent : null,
+        discountAmount: discountInfo ? discountInfo.discountAmount.toFixed(2) : null,
+        offerTitle: discountInfo ? discountInfo.offerTitle : null,
+        totalAmount: order.totalAmount.toString(),
+        items: order.items,
+      };
     }
 
     const amountInCents = Math.round(totalAmount * 100);

@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import {
   ThemeProvider,
   createTheme,
@@ -337,26 +338,71 @@ export default function OffersPage() {
           onLogout={handleLogout}
         />
 
-        {/* Hero */}
+        {/* ─── HERO SECTION ─── */}
         <Box
           sx={{
-            background: `linear-gradient(135deg, ${NAVY} 0%, #004a6e 100%)`,
-            py: { xs: 6, md: 8 },
-            textAlign: 'center',
+            position: 'relative',
+            minHeight: { xs: 420, md: 540 },
+            pb: { xs: '80px', md: '100px' },
+            display: 'flex',
+            alignItems: 'center',
+            clipPath: 'polygon(0 0, 100% 0, 100% 90%, 0 100%)',
           }}
         >
-          <Typography
-            variant="h3"
-            sx={{ fontWeight: 900, color: '#fff', mb: 1.5, fontSize: { xs: '1.8rem', md: '2.6rem' } }}
-          >
-            Active &amp; Upcoming{' '}
-            <Box component="span" sx={{ color: ACCENT }}>
-              Sales &amp; Deals
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src="https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?w=1800&h=700&fit=crop&q=85"
+            alt="Offers and deals"
+            style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center 40%', display: 'block' }}
+          />
+          <Box sx={{ position: 'absolute', inset: 0, background: `linear-gradient(105deg, rgba(0,44,62,0.96) 0%, rgba(0,44,62,0.82) 42%, rgba(0,44,62,0.52) 72%, rgba(0,44,62,0.22) 100%)` }} />
+          <Box sx={{ position: 'absolute', inset: 0, backgroundImage: 'radial-gradient(rgba(255,255,255,0.06) 1px, transparent 1px)', backgroundSize: '24px 24px', pointerEvents: 'none' }} />
+
+          <Container maxWidth="xl" sx={{ position: 'relative', zIndex: 1, py: { xs: 7, md: 9 } }}>
+            {/* Breadcrumb */}
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 3.5 }}>
+              <Link href="/" style={{ textDecoration: 'none' }}>
+                <Typography sx={{ color: 'rgba(255,255,255,0.5)', fontSize: '0.83rem', fontWeight: 500, cursor: 'pointer', transition: 'color 0.2s', '&:hover': { color: ACCENT } }}>
+                  Home
+                </Typography>
+              </Link>
+              <Typography sx={{ color: 'rgba(255,255,255,0.25)', fontSize: '0.83rem' }}>/</Typography>
+              <Typography sx={{ color: 'rgba(255,255,255,0.85)', fontSize: '0.83rem', fontWeight: 600 }}>Offers</Typography>
             </Box>
-          </Typography>
-          <Typography sx={{ color: 'rgba(255,255,255,0.7)', fontSize: '1rem', maxWidth: 500, mx: 'auto' }}>
-            Active discounts apply automatically at checkout — upcoming deals start on their listed date
-          </Typography>
+
+            {/* Overline */}
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 2 }}>
+              <Box sx={{ width: 32, height: 3, bgcolor: ACCENT, borderRadius: 2 }} />
+              <Typography variant="overline" sx={{ color: ACCENT, fontWeight: 700, letterSpacing: '0.22em', fontSize: '0.78rem' }}>
+                Exclusive Deals
+              </Typography>
+            </Box>
+
+            {/* Title */}
+            <Typography sx={{ fontWeight: 900, color: '#fff', fontSize: { xs: '2.6rem', sm: '3.4rem', md: '5rem' }, lineHeight: 1.05, letterSpacing: '-0.03em', mb: 2.5 }}>
+              Sales &amp;<br />
+              <Box component="span" sx={{ color: ACCENT }}>Offers</Box>
+            </Typography>
+
+            {/* Subtitle */}
+            <Typography sx={{ color: 'rgba(255,255,255,0.6)', fontSize: { xs: '0.97rem', md: '1.08rem' }, maxWidth: 460, lineHeight: 1.85, mb: 5 }}>
+              Active discounts apply automatically at checkout — no codes needed. Upcoming deals start on their listed date.
+            </Typography>
+
+            {/* Badges */}
+            <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
+              {[
+                { icon: <LocalOfferIcon sx={{ fontSize: 16 }} />, text: 'No coupon codes' },
+                { icon: <AutoAwesomeIcon sx={{ fontSize: 16 }} />, text: 'Auto-applied discounts' },
+                { icon: <ShoppingBagIcon sx={{ fontSize: 16 }} />, text: 'Site-wide savings' },
+              ].map(({ icon, text }) => (
+                <Box key={text} sx={{ display: 'flex', alignItems: 'center', gap: 1, bgcolor: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.12)', borderRadius: '999px', px: 2.2, py: 0.9, backdropFilter: 'blur(8px)' }}>
+                  <Box sx={{ color: ACCENT, display: 'flex' }}>{icon}</Box>
+                  <Typography sx={{ color: 'rgba(255,255,255,0.82)', fontSize: '0.83rem', fontWeight: 600 }}>{text}</Typography>
+                </Box>
+              ))}
+            </Box>
+          </Container>
         </Box>
 
         {/* Active sale highlight banner */}

@@ -109,32 +109,35 @@ function CheckoutForm({
       const { data } = await ordersApi.checkout({ paymentMethod });
 
       if (paymentMethod === 'CARD') {
-        if (!stripe || !elements) {
-          setError('Stripe has not loaded yet. Please try again.');
-          setSubmitting(false);
-          return;
-        }
-        if (!data.clientSecret) {
-          setError('No client secret returned from server.');
-          setSubmitting(false);
-          return;
-        }
+        // Mock mode: backend returned a placeholder secret — no real Stripe call needed.
+        if (data.clientSecret !== 'mock_client_secret') {
+          if (!stripe || !elements) {
+            setError('Stripe has not loaded yet. Please try again.');
+            setSubmitting(false);
+            return;
+          }
+          if (!data.clientSecret) {
+            setError('No client secret returned from server.');
+            setSubmitting(false);
+            return;
+          }
 
-        const cardElement = elements.getElement(CardElement);
-        if (!cardElement) {
-          setError('Card element not found.');
-          setSubmitting(false);
-          return;
-        }
+          const cardElement = elements.getElement(CardElement);
+          if (!cardElement) {
+            setError('Card element not found.');
+            setSubmitting(false);
+            return;
+          }
 
-        const { error: stripeError } = await stripe.confirmCardPayment(data.clientSecret, {
-          payment_method: { card: cardElement },
-        });
+          const { error: stripeError } = await stripe.confirmCardPayment(data.clientSecret, {
+            payment_method: { card: cardElement },
+          });
 
-        if (stripeError) {
-          setError(stripeError.message ?? 'Payment failed. Please try again.');
-          setSubmitting(false);
-          return;
+          if (stripeError) {
+            setError(stripeError.message ?? 'Payment failed. Please try again.');
+            setSubmitting(false);
+            return;
+          }
         }
       }
 
@@ -239,13 +242,29 @@ function CheckoutForm({
                         bgcolor: '#fafafa',
                       }}
                     >
-                      <CardElement options={CARD_ELEMENT_OPTIONS} />
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mt: 1.5 }}>
-                        <LockIcon sx={{ fontSize: 13, color: '#6b7280' }} />
-                        <Typography variant="caption" sx={{ color: 'text.secondary' }}>
-                          Your card details are encrypted and processed securely by Stripe
-                        </Typography>
-                      </Box>
+                      {stripe ? (
+                        <>
+                          <CardElement options={CARD_ELEMENT_OPTIONS} />
+                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mt: 1.5 }}>
+                            <LockIcon sx={{ fontSize: 13, color: '#6b7280' }} />
+                            <Typography variant="caption" sx={{ color: 'text.secondary' }}>
+                              Your card details are encrypted and processed securely by Stripe
+                            </Typography>
+                          </Box>
+                        </>
+                      ) : (
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                          <LockIcon sx={{ fontSize: 16, color: '#6b7280' }} />
+                          <Box>
+                            <Typography variant="caption" sx={{ fontWeight: 600, color: NAVY, display: 'block' }}>
+                              Test Mode — No real charge will be made
+                            </Typography>
+                            <Typography variant="caption" sx={{ color: 'text.secondary' }}>
+                              Card payment is simulated for testing purposes
+                            </Typography>
+                          </Box>
+                        </Box>
+                      )}
                     </Box>
                   )}
                 </Paper>
@@ -387,7 +406,7 @@ function CheckoutForm({
               variant="contained"
               fullWidth
               size="large"
-              disabled={submitting || (paymentMethod === 'CARD' && !stripePromise)}
+              disabled={submitting}
               sx={{
                 bgcolor: ACCENT,
                 '&:hover': { bgcolor: '#d93540' },

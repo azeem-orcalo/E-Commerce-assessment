@@ -173,7 +173,7 @@ export default function OrdersPage() {
           pb: { xs: '60px', md: '90px' },
           display: 'flex',
           alignItems: 'center',
-          clipPath: 'polygon(0 0, 100% 0, 100% 88%, 0 100%)',
+          clipPath: 'polygon(0 0, 100% 0, 100% 100%, 0 88%)',
         }}
       >
         {/* eslint-disable-next-line @next/next/no-img-element */}
