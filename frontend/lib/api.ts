@@ -293,6 +293,40 @@ export const ordersApi = {
   getOne: (id: string) => api.get<Order>(`/orders/${id}`),
 };
 
+// ─── Reviews ─────────────────────────────────────────────────────────────────
+
+export interface Review {
+  id: string;
+  userId: string;
+  productId: string;
+  orderId: string;
+  rating: number;
+  comment: string;
+  createdAt: string;
+  user: { firstName: string; lastName: string };
+}
+
+export interface CreateReviewPayload {
+  productId: string;
+  orderId: string;
+  rating: number;
+  comment: string;
+}
+
+export interface ReviewCheckResponse {
+  reviewed: boolean;
+  review: Review | null;
+}
+
+export const reviewsApi = {
+  create: (payload: CreateReviewPayload) =>
+    api.post<Review>('/reviews', payload),
+  findByProduct: (productId: string) =>
+    api.get<Review[]>('/reviews/product', { params: { productId } }),
+  check: (productId: string, orderId: string) =>
+    api.get<ReviewCheckResponse>('/reviews/check', { params: { productId, orderId } }),
+};
+
 // ─── Utilities ───────────────────────────────────────────────────────────────
 
 export function extractApiError(error: unknown): string {

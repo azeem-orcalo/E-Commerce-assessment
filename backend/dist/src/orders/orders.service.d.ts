@@ -20,9 +20,9 @@ export declare class OrdersService {
         } & {
             id: string;
             productId: string;
+            orderId: string;
             quantity: number;
             priceAtPurchase: import("@prisma/client-runtime-utils").Decimal;
-            orderId: string;
         })[];
     }>;
     private checkoutWithCod;
@@ -38,9 +38,9 @@ export declare class OrdersService {
         } & {
             id: string;
             productId: string;
+            orderId: string;
             quantity: number;
             priceAtPurchase: import("@prisma/client-runtime-utils").Decimal;
-            orderId: string;
         })[];
     } & {
         id: string;
@@ -63,9 +63,9 @@ export declare class OrdersService {
         } & {
             id: string;
             productId: string;
+            orderId: string;
             quantity: number;
             priceAtPurchase: import("@prisma/client-runtime-utils").Decimal;
-            orderId: string;
         })[];
     } & {
         id: string;

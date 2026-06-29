@@ -72,7 +72,7 @@ let AdminService = class AdminService {
         });
     }
     async getDashboardStats() {
-        const [totalRevenue, ordersByStatus, topProducts] = await Promise.all([
+        const [totalRevenue, ordersByStatus, topProducts, totalOrders, activeProducts] = await Promise.all([
             this.prisma.order.aggregate({
                 where: { status: { in: [client_1.OrderStatus.DELIVERED, client_1.OrderStatus.SHIPPED] } },
                 _sum: { totalAmount: true },
@@ -87,6 +87,8 @@ let AdminService = class AdminService {
                 orderBy: { _sum: { quantity: 'desc' } },
                 take: 5,
             }),
+            this.prisma.order.count(),
+            this.prisma.product.count({ where: { stock: { gt: 0 } } }),
         ]);
         const productIds = topProducts.map((p) => p.productId);
         const products = await this.prisma.product.findMany({
@@ -96,6 +98,8 @@ let AdminService = class AdminService {
         const productMap = new Map(products.map((p) => [p.id, p]));
         return {
             totalRevenue: Number(totalRevenue._sum.totalAmount ?? 0),
+            totalOrders,
+            activeStock: activeProducts,
             ordersByStatus: ordersByStatus.map((o) => ({
                 status: o.status,
                 count: o._count.id,

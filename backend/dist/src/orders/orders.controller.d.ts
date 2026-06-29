@@ -17,9 +17,9 @@ export declare class OrdersController {
         } & {
             id: string;
             productId: string;
+            orderId: string;
             quantity: number;
             priceAtPurchase: import("@prisma/client-runtime-utils").Decimal;
-            orderId: string;
         })[];
     }>;
     getOrders(userId: string): Promise<({
@@ -33,9 +33,9 @@ export declare class OrdersController {
         } & {
             id: string;
             productId: string;
+            orderId: string;
             quantity: number;
             priceAtPurchase: import("@prisma/client-runtime-utils").Decimal;
-            orderId: string;
         })[];
     } & {
         id: string;
@@ -58,9 +58,9 @@ export declare class OrdersController {
         } & {
             id: string;
             productId: string;
+            orderId: string;
             quantity: number;
             priceAtPurchase: import("@prisma/client-runtime-utils").Decimal;
-            orderId: string;
         })[];
     } & {
         id: string;

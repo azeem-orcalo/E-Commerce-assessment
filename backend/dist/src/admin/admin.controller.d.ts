@@ -20,20 +20,20 @@ export declare class AdminController {
                 };
             } & {
                 id: string;
-                orderId: string;
                 productId: string;
+                orderId: string;
                 quantity: number;
                 priceAtPurchase: import("@prisma/client-runtime-utils").Decimal;
             })[];
         } & {
             id: string;
+            createdAt: Date;
+            updatedAt: Date;
             userId: string;
             status: import(".prisma/client").$Enums.OrderStatus;
             totalAmount: import("@prisma/client-runtime-utils").Decimal;
             paymentMethod: import(".prisma/client").$Enums.PaymentMethod;
             stripePaymentIntentId: string | null;
-            createdAt: Date;
-            updatedAt: Date;
         })[];
         meta: {
             page: number;
@@ -56,23 +56,25 @@ export declare class AdminController {
             };
         } & {
             id: string;
-            orderId: string;
             productId: string;
+            orderId: string;
             quantity: number;
             priceAtPurchase: import("@prisma/client-runtime-utils").Decimal;
         })[];
     } & {
         id: string;
+        createdAt: Date;
+        updatedAt: Date;
         userId: string;
         status: import(".prisma/client").$Enums.OrderStatus;
         totalAmount: import("@prisma/client-runtime-utils").Decimal;
         paymentMethod: import(".prisma/client").$Enums.PaymentMethod;
         stripePaymentIntentId: string | null;
-        createdAt: Date;
-        updatedAt: Date;
     }) | null>;
     getDashboardStats(): Promise<{
         totalRevenue: number;
+        totalOrders: number;
+        activeStock: number;
         ordersByStatus: {
             status: import(".prisma/client").$Enums.OrderStatus;
             count: number;
