@@ -126,6 +126,17 @@ export interface Category {
   name: string;
 }
 
+export interface CategoriesQueryParams {
+  page?: number;
+  limit?: number;
+  search?: string;
+}
+
+export interface CategoriesResponse {
+  data: Category[];
+  meta: { page: number; limit: number; total: number; totalPages: number };
+}
+
 export interface ApiProduct {
   id: string;
   name: string;
@@ -169,7 +180,7 @@ export const productsApi = {
 };
 
 export const categoriesApi = {
-  list: () => api.get<Category[]>('/categories'),
+  list: (params?: CategoriesQueryParams) => api.get<CategoriesResponse>('/categories', { params }),
   create: (name: string) => api.post<Category>('/categories', { name }),
   update: (id: string, name: string) => api.patch<Category>(`/categories/${id}`, { name }),
   delete: (id: string) => api.delete(`/categories/${id}`),
@@ -294,6 +305,7 @@ export const ordersApi = {
     api.post<CheckoutResponse>('/orders/checkout', payload),
   list: () => api.get<Order[]>('/orders'),
   getOne: (id: string) => api.get<Order>(`/orders/${id}`),
+  clearAll: () => api.delete<{ deleted: number }>('/orders'),
 };
 
 // ─── Reviews ─────────────────────────────────────────────────────────────────

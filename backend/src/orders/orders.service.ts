@@ -270,4 +270,11 @@ export class OrdersService {
     if (!order) throw new NotFoundException('Order not found');
     return order;
   }
+
+  async clearAll(userId: string) {
+    await this.prisma.review.deleteMany({ where: { order: { userId } } });
+    await this.prisma.orderItem.deleteMany({ where: { order: { userId } } });
+    const { count } = await this.prisma.order.deleteMany({ where: { userId } });
+    return { deleted: count };
+  }
 }

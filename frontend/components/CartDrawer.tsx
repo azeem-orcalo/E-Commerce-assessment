@@ -1,5 +1,6 @@
 'use client';
 
+import { useEffect, useState } from 'react';
 import { useCart } from '@/lib/CartContext';
 import {
   Drawer,
@@ -17,7 +18,10 @@ import AddIcon from '@mui/icons-material/Add';
 import RemoveIcon from '@mui/icons-material/Remove';
 import ShoppingBagIcon from '@mui/icons-material/ShoppingBag';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
+import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
 import { useRouter } from 'next/navigation';
+import { getStoredUser } from '@/lib/api';
+import { openLoginModal } from '@/lib/authEvents';
 
 const theme = createTheme({
   palette: {
@@ -45,8 +49,19 @@ export default function CartDrawer() {
     updateQuantity,
   } = useCart();
   const router = useRouter();
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  // Re-check auth whenever the drawer opens
+  useEffect(() => {
+    if (isOpen) setIsLoggedIn(!!getStoredUser());
+  }, [isOpen]);
 
   const handleCheckout = () => {
+    if (!isLoggedIn) {
+      closeCart();
+      openLoginModal();
+      return;
+    }
     closeCart();
     router.push('/checkout');
   };
@@ -478,12 +493,34 @@ export default function CartDrawer() {
                 </Typography>
               </Box>
 
+              {!isLoggedIn && (
+                <Box
+                  sx={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 1.5,
+                    bgcolor: '#fff8f8',
+                    border: '1.5px solid rgba(247,68,78,0.2)',
+                    borderRadius: '10px',
+                    px: 2,
+                    py: 1.2,
+                    mb: 1.5,
+                  }}
+                >
+                  <LockOutlinedIcon sx={{ fontSize: 18, color: ACCENT, flexShrink: 0 }} />
+                  <Typography sx={{ fontSize: '0.8rem', color: '#6b7280', lineHeight: 1.4 }}>
+                    <Box component="span" sx={{ fontWeight: 700, color: NAVY }}>Sign in </Box>
+                    to complete your purchase
+                  </Typography>
+                </Box>
+              )}
+
               <Button
                 variant="contained"
                 color="primary"
                 fullWidth
                 onClick={handleCheckout}
-                endIcon={<ArrowForwardIcon />}
+                endIcon={isLoggedIn ? <ArrowForwardIcon /> : <LockOutlinedIcon sx={{ fontSize: 18 }} />}
                 sx={{
                   fontWeight: 700,
                   textTransform: 'none',
@@ -499,7 +536,7 @@ export default function CartDrawer() {
                   },
                 }}
               >
-                Checkout
+                {isLoggedIn ? 'Checkout' : 'Sign In to Checkout'}
               </Button>
 
               <Button

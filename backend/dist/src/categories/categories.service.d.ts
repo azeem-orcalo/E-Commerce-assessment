@@ -2,10 +2,18 @@ import { PrismaService } from '../prisma/prisma.service';
 export declare class CategoriesService {
     private readonly prisma;
     constructor(prisma: PrismaService);
-    findAll(): import(".prisma/client").Prisma.PrismaPromise<{
-        id: string;
-        name: string;
-    }[]>;
+    findAll(page?: number, limit?: number, search?: string): Promise<{
+        data: {
+            id: string;
+            name: string;
+        }[];
+        meta: {
+            page: number;
+            limit: number;
+            total: number;
+            totalPages: number;
+        };
+    }>;
     create(name: string): Promise<{
         id: string;
         name: string;

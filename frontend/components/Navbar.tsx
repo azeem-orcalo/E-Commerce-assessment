@@ -140,8 +140,8 @@ export default function Navbar({ currentUser, onSignIn, onSignUp, onLogout }: Na
               </IconButton>
             )}
 
-            {/* Cart — hidden for admins */}
-            {!isAdmin && <IconButton
+            {/* Cart — hidden for admins and guests */}
+            {!!currentUser && !isAdmin && <IconButton
               onClick={openCart}
               aria-label="Open cart"
               sx={{ color: 'rgba(255,255,255,0.85)', '&:hover': { color: ACCENT } }}

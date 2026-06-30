@@ -29,6 +29,8 @@ import LocalShippingIcon from '@mui/icons-material/LocalShipping';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import RateReviewIcon from '@mui/icons-material/RateReview';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import DeleteSweepIcon from '@mui/icons-material/DeleteSweep';
+import WarningAmberIcon from '@mui/icons-material/WarningAmber';
 import Navbar from '@/components/Navbar';
 import AuthModals, { type AuthUser } from '@/components/AuthModals';
 import {
@@ -73,6 +75,25 @@ export default function OrdersPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [expandedOrderId, setExpandedOrderId] = useState<string | null>(null);
+
+  // clear all dialog state
+  const [clearAllOpen, setClearAllOpen] = useState(false);
+  const [clearAllLoading, setClearAllLoading] = useState(false);
+  const [clearAllError, setClearAllError] = useState<string | null>(null);
+
+  const handleClearAll = async () => {
+    setClearAllLoading(true);
+    setClearAllError(null);
+    try {
+      await ordersApi.clearAll();
+      setOrders([]);
+      setClearAllOpen(false);
+    } catch (err) {
+      setClearAllError(extractApiError(err));
+    } finally {
+      setClearAllLoading(false);
+    }
+  };
 
   // review dialog state
   const [reviewDialog, setReviewDialog] = useState<{
@@ -388,6 +409,62 @@ export default function OrdersPage() {
             </Box>
           ) : (
             /* ── Orders stack ── */
+            <Box>
+              {/* Continue shopping + Clear All CTAs */}
+              <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 2, mb: 3, flexWrap: 'wrap' }}>
+                <Link href="/products" style={{ textDecoration: 'none' }}>
+                  <Button
+                    variant="outlined"
+                    size="large"
+                    sx={{
+                      borderColor: NAVY,
+                      color: NAVY,
+                      px: 4,
+                      py: 1.2,
+                      fontWeight: 700,
+                      textTransform: 'none',
+                      fontSize: '0.95rem',
+                      borderRadius: 2,
+                      transition: 'all 0.2s',
+                      '&:hover': {
+                        bgcolor: NAVY,
+                        color: '#fff',
+                        borderColor: NAVY,
+                        transform: 'scale(1.03)',
+                      },
+                    }}
+                  >
+                    Continue Shopping
+                  </Button>
+                </Link>
+
+                <Button
+                  variant="outlined"
+                  size="large"
+                  startIcon={<DeleteSweepIcon />}
+                  onClick={() => { setClearAllError(null); setClearAllOpen(true); }}
+                  sx={{
+                    borderColor: '#ef4444',
+                    color: '#ef4444',
+                    px: 4,
+                    py: 1.2,
+                    fontWeight: 700,
+                    textTransform: 'none',
+                    fontSize: '0.95rem',
+                    borderRadius: 2,
+                    transition: 'all 0.2s',
+                    '&:hover': {
+                      bgcolor: '#ef4444',
+                      color: '#fff',
+                      borderColor: '#ef4444',
+                      transform: 'scale(1.03)',
+                    },
+                  }}
+                >
+                  Clear All Orders
+                </Button>
+              </Box>
+
             <Stack spacing={3}>
               {orders.map((order) => {
                 const isExpanded = expandedOrderId === order.id;
@@ -493,7 +570,7 @@ export default function OrdersPage() {
                           <Typography
                             sx={{ fontWeight: 800, color: ACCENT, fontSize: '1.05rem' }}
                           >
-                            £{Number(order.totalAmount).toFixed(2)}
+                            ${Number(order.totalAmount).toFixed(2)}
                           </Typography>
                         </Box>
 
@@ -567,7 +644,7 @@ export default function OrdersPage() {
                         <Typography
                           sx={{ fontWeight: 800, color: ACCENT, fontSize: '1rem' }}
                         >
-                          £{Number(order.totalAmount).toFixed(2)}
+                          ${Number(order.totalAmount).toFixed(2)}
                         </Typography>
                       </Box>
                     </Box>
@@ -613,8 +690,7 @@ export default function OrdersPage() {
                                     {item.product.name}
                                   </Typography>
                                   <Typography variant="caption" sx={{ color: '#6b7280' }}>
-                                    Qty: {item.quantity} · £
-                                    {Number(item.priceAtPurchase).toFixed(2)} each
+                                    Qty: {item.quantity} · ${Number(item.priceAtPurchase).toFixed(2)} each
                                   </Typography>
                                 </Box>
                                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, flexShrink: 0 }}>
@@ -622,7 +698,7 @@ export default function OrdersPage() {
                                     variant="body2"
                                     sx={{ fontWeight: 700, color: NAVY, whiteSpace: 'nowrap' }}
                                   >
-                                    £{(Number(item.priceAtPurchase) * item.quantity).toFixed(2)}
+                                    ${(Number(item.priceAtPurchase) * item.quantity).toFixed(2)}
                                   </Typography>
                                   {order.status === 'DELIVERED' && (
                                     alreadyReviewed ? (
@@ -722,7 +798,7 @@ export default function OrdersPage() {
                             <Typography
                               sx={{ fontWeight: 900, fontSize: '1.3rem', color: ACCENT }}
                             >
-                              £{Number(order.totalAmount).toFixed(2)}
+                              ${Number(order.totalAmount).toFixed(2)}
                             </Typography>
                           </Box>
                         </Box>
@@ -765,36 +841,6 @@ export default function OrdersPage() {
                 );
               })}
             </Stack>
-          )}
-
-          {/* Continue shopping CTA */}
-          {!loading && orders.length > 0 && (
-            <Box sx={{ textAlign: 'center', mt: 7 }}>
-              <Link href="/products" style={{ textDecoration: 'none' }}>
-                <Button
-                  variant="outlined"
-                  size="large"
-                  sx={{
-                    borderColor: NAVY,
-                    color: NAVY,
-                    px: 7,
-                    py: 1.8,
-                    fontWeight: 700,
-                    textTransform: 'none',
-                    fontSize: '1rem',
-                    borderRadius: 2,
-                    transition: 'all 0.2s',
-                    '&:hover': {
-                      bgcolor: NAVY,
-                      color: '#fff',
-                      borderColor: NAVY,
-                      transform: 'scale(1.03)',
-                    },
-                  }}
-                >
-                  Continue Shopping
-                </Button>
-              </Link>
             </Box>
           )}
         </Container>
@@ -806,6 +852,55 @@ export default function OrdersPage() {
         onSwitch={(to) => setAuthModal(to)}
         onSuccess={handleAuthSuccess}
       />
+
+      {/* ─── CLEAR ALL CONFIRMATION DIALOG ─── */}
+      <Dialog
+        open={clearAllOpen}
+        onClose={() => !clearAllLoading && setClearAllOpen(false)}
+        maxWidth="xs"
+        fullWidth
+        slotProps={{ paper: { sx: { borderRadius: '16px', p: 1 } } }}
+      >
+        <DialogTitle sx={{ fontWeight: 800, color: NAVY, fontSize: '1.1rem', pb: 0.5, display: 'flex', alignItems: 'center', gap: 1 }}>
+          <WarningAmberIcon sx={{ color: '#ef4444' }} />
+          Clear All Orders?
+        </DialogTitle>
+        <DialogContent sx={{ pt: 1.5 }}>
+          <Typography variant="body2" sx={{ color: '#4b5563', lineHeight: 1.7 }}>
+            This will permanently delete your entire order history. This action cannot be undone.
+          </Typography>
+          {clearAllError && (
+            <Typography variant="caption" sx={{ color: '#ef4444', mt: 1.5, display: 'block' }}>
+              {clearAllError}
+            </Typography>
+          )}
+        </DialogContent>
+        <DialogActions sx={{ px: 3, pb: 2.5, gap: 1 }}>
+          <Button
+            onClick={() => setClearAllOpen(false)}
+            disabled={clearAllLoading}
+            sx={{ color: '#6b7280', textTransform: 'none', fontWeight: 600 }}
+          >
+            Cancel
+          </Button>
+          <Button
+            variant="contained"
+            onClick={handleClearAll}
+            disabled={clearAllLoading}
+            startIcon={clearAllLoading ? <CircularProgress size={16} sx={{ color: '#fff' }} /> : <DeleteSweepIcon />}
+            sx={{
+              bgcolor: '#ef4444',
+              '&:hover': { bgcolor: '#dc2626' },
+              textTransform: 'none',
+              fontWeight: 700,
+              px: 3,
+              borderRadius: 2,
+            }}
+          >
+            {clearAllLoading ? 'Clearing…' : 'Yes, Clear All'}
+          </Button>
+        </DialogActions>
+      </Dialog>
 
       {/* ─── REVIEW DIALOG ─── */}
       <Dialog

@@ -88,6 +88,9 @@ export declare class AdminController {
         }[];
         topProducts: {
             name: string;
+            imageUrl: string | null;
+            description: string;
+            price: number;
             unitsSold: number;
         }[];
     }>;

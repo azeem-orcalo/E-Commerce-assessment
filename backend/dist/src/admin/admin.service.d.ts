@@ -120,6 +120,9 @@ export declare class AdminService {
         }[];
         topProducts: {
             name: string;
+            imageUrl: string | null;
+            description: string;
+            price: number;
             unitsSold: number;
         }[];
     }>;

@@ -116,7 +116,7 @@ export default function ProductsPage() {
 
   // Fetch categories once on mount
   useEffect(() => {
-    categoriesApi.list().then((res) => setCategories(res.data)).catch(() => {});
+    categoriesApi.list().then((res) => setCategories(res.data.data)).catch(() => {});
   }, []);
 
   // Fetch products when any filter/page changes

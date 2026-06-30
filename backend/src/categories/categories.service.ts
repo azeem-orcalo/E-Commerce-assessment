@@ -5,8 +5,21 @@ import { PrismaService } from '../prisma/prisma.service';
 export class CategoriesService {
   constructor(private readonly prisma: PrismaService) {}
 
-  findAll() {
-    return this.prisma.category.findMany({ orderBy: { name: 'asc' } });
+  async findAll(page = 1, limit = 10, search = '') {
+    const skip  = (page - 1) * limit;
+    const where = search
+      ? { name: { contains: search, mode: 'insensitive' as const } }
+      : undefined;
+
+    const [categories, total] = await this.prisma.$transaction([
+      this.prisma.category.findMany({ where, orderBy: { name: 'asc' }, skip, take: limit }),
+      this.prisma.category.count({ where }),
+    ]);
+
+    return {
+      data: categories,
+      meta: { page, limit, total, totalPages: Math.ceil(total / limit) },
+    };
   }
 
   async create(name: string) {
@@ -24,12 +37,22 @@ export class CategoriesService {
 
   async remove(id: string) {
     await this.findOneOrFail(id);
-    const productCount = await this.prisma.product.count({ where: { categoryId: id, deletedAt: null } });
+
+    const productCount = await this.prisma.product.count({ where: { categoryId: id } });
     if (productCount > 0) {
-      throw new BadRequestException(
-        `Cannot delete category — ${productCount} product(s) are still assigned to it.`,
-      );
+      // Ensure a fallback "Uncategorized" category exists
+      const fallback = await this.prisma.category.upsert({
+        where: { name: 'Uncategorized' },
+        update: {},
+        create: { name: 'Uncategorized' },
+      });
+      // Reassign all products from the deleted category to the fallback
+      await this.prisma.product.updateMany({
+        where: { categoryId: id },
+        data: { categoryId: fallback.id },
+      });
     }
+
     await this.prisma.category.delete({ where: { id } });
     return { message: 'Category deleted successfully' };
   }

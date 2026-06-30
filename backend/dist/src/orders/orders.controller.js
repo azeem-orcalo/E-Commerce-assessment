@@ -32,6 +32,9 @@ let OrdersController = class OrdersController {
     getOrder(userId, orderId) {
         return this.ordersService.getOrder(userId, orderId);
     }
+    clearAll(userId) {
+        return this.ordersService.clearAll(userId);
+    }
 };
 exports.OrdersController = OrdersController;
 __decorate([
@@ -60,6 +63,14 @@ __decorate([
     __metadata("design:paramtypes", [String, String]),
     __metadata("design:returntype", void 0)
 ], OrdersController.prototype, "getOrder", null);
+__decorate([
+    (0, common_1.Delete)(),
+    (0, swagger_1.ApiOperation)({ summary: 'Delete all orders for the current user' }),
+    __param(0, (0, current_user_decorator_1.CurrentUser)('id')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", void 0)
+], OrdersController.prototype, "clearAll", null);
 exports.OrdersController = OrdersController = __decorate([
     (0, swagger_1.ApiTags)('Orders'),
     (0, common_1.Controller)('orders'),

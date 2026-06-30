@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, ParseUUIDPipe, Post } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, ParseUUIDPipe, Post } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { CreateOrderDto } from './dto/create-order.dto';
@@ -31,5 +31,11 @@ export class OrdersController {
     @Param('id', ParseUUIDPipe) orderId: string,
   ) {
     return this.ordersService.getOrder(userId, orderId);
+  }
+
+  @Delete()
+  @ApiOperation({ summary: 'Delete all orders for the current user' })
+  clearAll(@CurrentUser('id') userId: string) {
+    return this.ordersService.clearAll(userId);
   }
 }

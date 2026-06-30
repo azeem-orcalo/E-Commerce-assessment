@@ -8,7 +8,6 @@ import {
   CardContent,
   Skeleton,
   Alert,
-  Divider,
   Chip,
 } from '@mui/material';
 import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
@@ -46,7 +45,7 @@ interface DashboardStats {
   totalOrders: number;
   activeStock: number;
   ordersByStatus: { status: string; count: number }[];
-  topProducts: { name: string; unitsSold: number }[];
+  topProducts: { name: string; imageUrl: string | null; description: string; price: number; unitsSold: number }[];
 }
 
 function StatCard({
@@ -293,38 +292,95 @@ export default function AdminDashboard() {
       </Box>
 
       {/* Top Products */}
-      {!loading && (stats?.topProducts ?? []).length > 0 && (
-        <Card elevation={0} sx={{ border: '1.5px solid rgba(0,0,0,0.07)', borderRadius: '16px', bgcolor: '#fff' }}>
-          <CardContent sx={{ p: 3 }}>
-            <Typography sx={{ fontWeight: 700, fontSize: '1rem', color: NAVY, mb: 0.5 }}>Top Selling Products</Typography>
-            <Typography sx={{ fontSize: '0.78rem', color: '#9ca3af', mb: 3 }}>Ranked by total units sold</Typography>
-            <Box>
-              {(stats?.topProducts ?? []).slice(0, 5).map((p, i) => {
-                const max = stats!.topProducts[0]?.unitsSold ?? 1;
-                return (
-                  <Box key={p.name}>
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, py: 1.5 }}>
-                      <Typography sx={{ width: 24, fontSize: '0.78rem', color: '#9ca3af', fontWeight: 700 }}>
-                        #{i + 1}
-                      </Typography>
-                      <Box sx={{ flex: 1 }}>
-                        <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.6 }}>
-                          <Typography sx={{ fontSize: '0.85rem', fontWeight: 600, color: NAVY }}>{p.name}</Typography>
-                          <Typography sx={{ fontSize: '0.82rem', fontWeight: 700, color: ACCENT }}>{p.unitsSold} units</Typography>
-                        </Box>
-                        <Box sx={{ height: 6, bgcolor: '#f3f4f6', borderRadius: 3, overflow: 'hidden' }}>
-                          <Box sx={{ height: '100%', width: `${(p.unitsSold / max) * 100}%`, bgcolor: i === 0 ? ACCENT : NAVY, borderRadius: 3, transition: 'width 0.6s ease' }} />
-                        </Box>
-                      </Box>
-                    </Box>
-                    {i < (stats?.topProducts.length ?? 0) - 1 && <Divider sx={{ opacity: 0.5 }} />}
+      <Box sx={{ mb: 2 }}>
+        <Typography sx={{ fontWeight: 700, fontSize: '1rem', color: NAVY, mb: 0.5 }}>Top Selling Products</Typography>
+        <Typography sx={{ fontSize: '0.78rem', color: '#9ca3af', mb: 3 }}>Ranked by total units sold</Typography>
+
+        {loading ? (
+          <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: 2.5 }}>
+            {Array.from({ length: 5 }).map((_, i) => (
+              <Card key={i} elevation={0} sx={{ border: '1.5px solid rgba(0,0,0,0.07)', borderRadius: '16px', overflow: 'hidden' }}>
+                <Skeleton variant="rectangular" sx={{ width: '100%', height: 160, display: 'block' }} />
+                <CardContent sx={{ p: 2 }}>
+                  <Skeleton width="80%" height={20} />
+                  <Skeleton width="60%" height={16} sx={{ mt: 0.5 }} />
+                  <Skeleton width="40%" height={16} sx={{ mt: 1 }} />
+                </CardContent>
+              </Card>
+            ))}
+          </Box>
+        ) : (stats?.topProducts ?? []).length === 0 ? (
+          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: 160, color: '#d1d5db', border: '1.5px dashed rgba(0,0,0,0.1)', borderRadius: '16px' }}>
+            <Typography sx={{ fontSize: '0.85rem' }}>No sales data yet</Typography>
+          </Box>
+        ) : (
+          <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: 2.5 }}>
+            {(stats?.topProducts ?? []).slice(0, 5).map((p, i) => (
+              <Card
+                key={p.name}
+                elevation={0}
+                sx={{
+                  border: '1.5px solid rgba(0,0,0,0.07)',
+                  borderRadius: '16px',
+                  bgcolor: '#fff',
+                  position: 'relative',
+                  overflow: 'hidden',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  transition: 'transform 0.2s, box-shadow 0.2s',
+                  '&:hover': { transform: 'translateY(-3px)', boxShadow: '0 12px 36px rgba(0,44,62,0.1)' },
+                }}
+              >
+                {/* Rank badge */}
+                <Box sx={{
+                  position: 'absolute', top: 10, left: 10, zIndex: 1,
+                  width: 28, height: 28, borderRadius: '50%',
+                  bgcolor: i === 0 ? ACCENT : NAVY,
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                }}>
+                  <Typography sx={{ fontSize: '0.72rem', fontWeight: 800, color: '#fff' }}>#{i + 1}</Typography>
+                </Box>
+
+                {/* Image container — fixed height, full card width */}
+                <Box sx={{ width: '100%', height: 160, overflow: 'hidden', flexShrink: 0 }}>
+                  <Box
+                    component="img"
+                    src={p.imageUrl || `https://placehold.co/400x160/f3f4f6/9ca3af?text=${encodeURIComponent(p.name)}`}
+                    alt={p.name}
+                    sx={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+                  />
+                </Box>
+
+                <CardContent sx={{ p: 2, pb: '12px !important', flex: 1, display: 'flex', flexDirection: 'column' }}>
+                  <Typography sx={{ fontWeight: 700, fontSize: '0.88rem', color: NAVY, lineHeight: 1.3, mb: 0.5, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+                    {p.name}
+                  </Typography>
+                  <Typography sx={{ fontSize: '0.75rem', color: '#6b7280', lineHeight: 1.4, mb: 1.5, flex: 1, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+                    {p.description || 'No description available'}
+                  </Typography>
+
+                  <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                    <Typography sx={{ fontSize: '0.9rem', fontWeight: 800, color: ACCENT }}>
+                      ${p.price.toFixed(2)}
+                    </Typography>
+                    <Chip
+                      label={`${p.unitsSold} sold`}
+                      size="small"
+                      sx={{
+                        fontSize: '0.68rem',
+                        fontWeight: 700,
+                        height: 22,
+                        bgcolor: i === 0 ? `${ACCENT}18` : 'rgba(0,44,62,0.08)',
+                        color: i === 0 ? ACCENT : NAVY,
+                      }}
+                    />
                   </Box>
-                );
-              })}
-            </Box>
-          </CardContent>
-        </Card>
-      )}
+                </CardContent>
+              </Card>
+            ))}
+          </Box>
+        )}
+      </Box>
     </Box>
   );
 }

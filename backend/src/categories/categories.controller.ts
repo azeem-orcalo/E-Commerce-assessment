@@ -9,8 +9,9 @@ import {
   ParseUUIDPipe,
   Patch,
   Post,
+  Query,
 } from '@nestjs/common';
-import { ApiOperation, ApiTags } from '@nestjs/swagger';
+import { ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { Role } from '@prisma/client';
 import { Public } from '../auth/decorators/public.decorator';
 import { Roles } from '../auth/decorators/roles.decorator';
@@ -24,9 +25,16 @@ export class CategoriesController {
 
   @Public()
   @Get()
-  @ApiOperation({ summary: 'List all categories' })
-  findAll() {
-    return this.categoriesService.findAll();
+  @ApiOperation({ summary: 'List categories with search and pagination' })
+  @ApiQuery({ name: 'page',   required: false, type: Number })
+  @ApiQuery({ name: 'limit',  required: false, type: Number })
+  @ApiQuery({ name: 'search', required: false, type: String })
+  findAll(
+    @Query('page')   page   = '1',
+    @Query('limit')  limit  = '10',
+    @Query('search') search = '',
+  ) {
+    return this.categoriesService.findAll(+page, +limit, search);
   }
 
   @Roles(Role.ADMIN)

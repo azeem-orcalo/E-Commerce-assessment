@@ -342,7 +342,7 @@ function CheckoutForm({
                     </Typography>
                   </Box>
                   <Typography variant="body2" sx={{ fontWeight: 700, color: NAVY, whiteSpace: 'nowrap' }}>
-                    £{(parseFloat(item.product.price) * item.quantity).toFixed(2)}
+                    ${(parseFloat(item.product.price) * item.quantity).toFixed(2)}
                   </Typography>
                 </Box>
               ))}
@@ -362,7 +362,7 @@ function CheckoutForm({
                     color: activeOffer ? 'text.secondary' : 'inherit',
                   }}
                 >
-                  £{cartTotal.toFixed(2)}
+                  ${cartTotal.toFixed(2)}
                 </Typography>
               </Box>
 
@@ -372,7 +372,7 @@ function CheckoutForm({
                     Discount ({discountPercent}% off)
                   </Typography>
                   <Typography variant="body2" sx={{ fontWeight: 700, color: '#16a34a' }}>
-                    -£{discountAmount.toFixed(2)}
+                    -${discountAmount.toFixed(2)}
                   </Typography>
                 </Box>
               )}
@@ -390,13 +390,13 @@ function CheckoutForm({
                 <Typography sx={{ fontWeight: 700, color: NAVY }}>Total</Typography>
                 {activeOffer && (
                   <Typography variant="caption" sx={{ color: '#16a34a' }}>
-                    You save £{discountAmount.toFixed(2)}!
+                    You save ${discountAmount.toFixed(2)}!
                   </Typography>
                 )}
               </Box>
               <Box sx={{ textAlign: 'right' }}>
                 <Typography sx={{ fontWeight: 800, fontSize: '1.2rem', color: ACCENT }}>
-                  £{grandTotal.toFixed(2)}
+                  ${grandTotal.toFixed(2)}
                 </Typography>
               </Box>
             </Box>
@@ -422,10 +422,10 @@ function CheckoutForm({
               ) : paymentMethod === 'CARD' ? (
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                   <LockIcon sx={{ fontSize: 18 }} />
-                  Pay £{grandTotal.toFixed(2)}
+                  Pay ${grandTotal.toFixed(2)}
                 </Box>
               ) : (
-                `Place Order · £${grandTotal.toFixed(2)}`
+                `Place Order · $${grandTotal.toFixed(2)}`
               )}
             </Button>
 
@@ -550,7 +550,7 @@ export default function CheckoutPage() {
             Checkout
           </Typography>
           <Typography variant="body2" sx={{ color: 'text.secondary', mb: 3 }}>
-            {items.length} item{items.length !== 1 ? 's' : ''} · £{grandTotal.toFixed(2)}
+            {items.length} item{items.length !== 1 ? 's' : ''} · ${grandTotal.toFixed(2)}
             {activeOffer && (
               <Typography component="span" variant="body2" sx={{ color: '#16a34a', ml: 0.5 }}>
                 (after {discountPercent}% sale discount)

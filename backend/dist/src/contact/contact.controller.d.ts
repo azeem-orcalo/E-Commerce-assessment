@@ -6,32 +6,32 @@ export declare class ContactController {
     constructor(contactService: ContactService);
     create(dto: CreateContactDto): import(".prisma/client").Prisma.Prisma__ContactQueryClient<{
         id: string;
-        name: string;
         email: string;
-        subject: string;
-        message: string;
-        status: import(".prisma/client").$Enums.ContactStatus;
         createdAt: Date;
         updatedAt: Date;
+        name: string;
+        status: import(".prisma/client").$Enums.ContactStatus;
+        message: string;
+        subject: string;
     }, never, import("@prisma/client/runtime/client").DefaultArgs, import(".prisma/client").Prisma.PrismaClientOptions>;
     findAll(): import(".prisma/client").Prisma.PrismaPromise<{
         id: string;
-        name: string;
         email: string;
-        subject: string;
-        message: string;
-        status: import(".prisma/client").$Enums.ContactStatus;
         createdAt: Date;
         updatedAt: Date;
+        name: string;
+        status: import(".prisma/client").$Enums.ContactStatus;
+        message: string;
+        subject: string;
     }[]>;
     updateStatus(id: string, dto: UpdateContactStatusDto): import(".prisma/client").Prisma.Prisma__ContactQueryClient<{
         id: string;
-        name: string;
         email: string;
-        subject: string;
-        message: string;
-        status: import(".prisma/client").$Enums.ContactStatus;
         createdAt: Date;
         updatedAt: Date;
+        name: string;
+        status: import(".prisma/client").$Enums.ContactStatus;
+        message: string;
+        subject: string;
     }, never, import("@prisma/client/runtime/client").DefaultArgs, import(".prisma/client").Prisma.PrismaClientOptions>;
 }

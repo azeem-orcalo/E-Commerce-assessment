@@ -232,6 +232,12 @@ let OrdersService = class OrdersService {
             throw new common_1.NotFoundException('Order not found');
         return order;
     }
+    async clearAll(userId) {
+        await this.prisma.review.deleteMany({ where: { order: { userId } } });
+        await this.prisma.orderItem.deleteMany({ where: { order: { userId } } });
+        const { count } = await this.prisma.order.deleteMany({ where: { userId } });
+        return { deleted: count };
+    }
 };
 exports.OrdersService = OrdersService;
 exports.OrdersService = OrdersService = __decorate([

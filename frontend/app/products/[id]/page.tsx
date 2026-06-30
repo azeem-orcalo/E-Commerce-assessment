@@ -739,6 +739,15 @@ export default function ProductDetailPage() {
         </Container>
       </Box>
 
+      {/* ─── BASED ON YOUR PURCHASE HISTORY ─── */}
+      <SuggestionsRow
+        userId={currentUser?.id ?? null}
+        excludeId={id}
+        title="Based on Your Purchase History"
+        subtitle={currentUser ? 'Recommended for You' : 'Trending in our store'}
+        onLoginRequired={() => setAuthModal('login')}
+      />
+
       {/* ─── FOOTER ─── */}
       <Box sx={{ bgcolor: NAVY, color: '#fff', pt: 8, pb: 4 }}>
         <Container maxWidth="xl">
@@ -789,15 +798,6 @@ export default function ProductDetailPage() {
           </Box>
         </Container>
       </Box>
-
-      {/* ─── SUGGESTIONS ROW ─── */}
-      <SuggestionsRow
-        userId={currentUser?.id ?? null}
-        excludeId={id}
-        title="You Might Also Like"
-        subtitle={currentUser ? 'Based on your purchase history' : 'Trending in our store'}
-        onLoginRequired={() => setAuthModal('login')}
-      />
 
       <AuthModals
         mode={authModal}

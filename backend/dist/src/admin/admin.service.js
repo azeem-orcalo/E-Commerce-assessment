@@ -151,7 +151,7 @@ let AdminService = class AdminService {
         const productIds = topProducts.map((p) => p.productId);
         const products = await this.prisma.product.findMany({
             where: { id: { in: productIds } },
-            select: { id: true, name: true, imageUrl: true, price: true },
+            select: { id: true, name: true, imageUrl: true, description: true, price: true },
         });
         const productMap = new Map(products.map((p) => [p.id, p]));
         return {
@@ -162,10 +162,16 @@ let AdminService = class AdminService {
                 status: o.status,
                 count: o._count.id,
             })),
-            topProducts: topProducts.map((tp) => ({
-                name: productMap.get(tp.productId)?.name ?? 'Unknown',
-                unitsSold: tp._sum.quantity ?? 0,
-            })),
+            topProducts: topProducts.map((tp) => {
+                const product = productMap.get(tp.productId);
+                return {
+                    name: product?.name ?? 'Unknown',
+                    imageUrl: product?.imageUrl ?? null,
+                    description: product?.description ?? '',
+                    price: product ? Number(product.price) : 0,
+                    unitsSold: tp._sum.quantity ?? 0,
+                };
+            }),
         };
     }
 };

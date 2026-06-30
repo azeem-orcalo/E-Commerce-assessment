@@ -17,8 +17,19 @@ let CategoriesService = class CategoriesService {
     constructor(prisma) {
         this.prisma = prisma;
     }
-    findAll() {
-        return this.prisma.category.findMany({ orderBy: { name: 'asc' } });
+    async findAll(page = 1, limit = 10, search = '') {
+        const skip = (page - 1) * limit;
+        const where = search
+            ? { name: { contains: search, mode: 'insensitive' } }
+            : undefined;
+        const [categories, total] = await this.prisma.$transaction([
+            this.prisma.category.findMany({ where, orderBy: { name: 'asc' }, skip, take: limit }),
+            this.prisma.category.count({ where }),
+        ]);
+        return {
+            data: categories,
+            meta: { page, limit, total, totalPages: Math.ceil(total / limit) },
+        };
     }
     async create(name) {
         const existing = await this.prisma.category.findUnique({ where: { name } });
@@ -35,9 +46,17 @@ let CategoriesService = class CategoriesService {
     }
     async remove(id) {
         await this.findOneOrFail(id);
-        const productCount = await this.prisma.product.count({ where: { categoryId: id, deletedAt: null } });
+        const productCount = await this.prisma.product.count({ where: { categoryId: id } });
         if (productCount > 0) {
-            throw new common_1.BadRequestException(`Cannot delete category — ${productCount} product(s) are still assigned to it.`);
+            const fallback = await this.prisma.category.upsert({
+                where: { name: 'Uncategorized' },
+                update: {},
+                create: { name: 'Uncategorized' },
+            });
+            await this.prisma.product.updateMany({
+                where: { categoryId: id },
+                data: { categoryId: fallback.id },
+            });
         }
         await this.prisma.category.delete({ where: { id } });
         return { message: 'Category deleted successfully' };

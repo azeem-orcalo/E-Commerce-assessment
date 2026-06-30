@@ -25,8 +25,8 @@ let CategoriesController = class CategoriesController {
     constructor(categoriesService) {
         this.categoriesService = categoriesService;
     }
-    findAll() {
-        return this.categoriesService.findAll();
+    findAll(page = '1', limit = '10', search = '') {
+        return this.categoriesService.findAll(+page, +limit, search);
     }
     create(dto) {
         return this.categoriesService.create(dto.name);
@@ -42,9 +42,15 @@ exports.CategoriesController = CategoriesController;
 __decorate([
     (0, public_decorator_1.Public)(),
     (0, common_1.Get)(),
-    (0, swagger_1.ApiOperation)({ summary: 'List all categories' }),
+    (0, swagger_1.ApiOperation)({ summary: 'List categories with search and pagination' }),
+    (0, swagger_1.ApiQuery)({ name: 'page', required: false, type: Number }),
+    (0, swagger_1.ApiQuery)({ name: 'limit', required: false, type: Number }),
+    (0, swagger_1.ApiQuery)({ name: 'search', required: false, type: String }),
+    __param(0, (0, common_1.Query)('page')),
+    __param(1, (0, common_1.Query)('limit')),
+    __param(2, (0, common_1.Query)('search')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", []),
+    __metadata("design:paramtypes", [Object, Object, Object]),
     __metadata("design:returntype", void 0)
 ], CategoriesController.prototype, "findAll", null);
 __decorate([

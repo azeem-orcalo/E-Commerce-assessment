@@ -23,12 +23,17 @@ import {
   Tooltip,
   InputAdornment,
   Chip,
+  Select,
+  MenuItem,
+  FormControl,
+  InputLabel,
+  Pagination,
 } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import SearchIcon from '@mui/icons-material/Search';
-import { categoriesApi, type Category, extractApiError } from '@/lib/api';
+import { categoriesApi, type Category, type CategoriesResponse, extractApiError } from '@/lib/api';
 
 const ACCENT = '#f7444e';
 const NAVY   = '#002c3e';
@@ -41,11 +46,18 @@ const fieldSx = {
   '& .MuiInputLabel-root.Mui-focused': { color: ACCENT },
 };
 
+const LIMIT_OPTIONS = [5, 10, 20, 50];
+
 export default function AdminCategoriesPage() {
   const [categories, setCategories] = useState<Category[]>([]);
+  const [meta, setMeta]             = useState({ page: 1, limit: 10, total: 0, totalPages: 1 });
   const [loading, setLoading]       = useState(true);
   const [error, setError]           = useState<string | null>(null);
-  const [search, setSearch]         = useState('');
+
+  const [page, setPage]     = useState(1);
+  const [limit, setLimit]   = useState(10);
+  const [search, setSearch] = useState('');
+  const [searchInput, setSearchInput] = useState('');
 
   const [dialogOpen, setDialogOpen]   = useState(false);
   const [editTarget, setEditTarget]   = useState<Category | null>(null);
@@ -61,20 +73,29 @@ export default function AdminCategoriesPage() {
     setLoading(true);
     setError(null);
     try {
-      const { data } = await categoriesApi.list();
-      setCategories(Array.isArray(data) ? data : []);
+      const res = await categoriesApi.list({ page, limit, search: search || undefined });
+      const body = res.data as unknown as CategoriesResponse;
+      setCategories(body.data);
+      setMeta(body.meta);
     } catch (e) {
       setError(extractApiError(e));
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [page, limit, search]);
 
   useEffect(() => { fetchCategories(); }, [fetchCategories]);
 
-  const filtered = categories.filter((c) =>
-    c.name.toLowerCase().includes(search.toLowerCase()),
-  );
+  // Reset to page 1 when search or limit changes
+  const handleSearch = () => {
+    setPage(1);
+    setSearch(searchInput);
+  };
+
+  const handleLimitChange = (newLimit: number) => {
+    setPage(1);
+    setLimit(newLimit);
+  };
 
   const openAdd = () => {
     setEditTarget(null);
@@ -117,13 +138,18 @@ export default function AdminCategoriesPage() {
     try {
       await categoriesApi.delete(deleteTarget.id);
       setDeleteTarget(null);
-      fetchCategories();
+      // If last item on page and not page 1, go back one page
+      if (categories.length === 1 && page > 1) setPage((p) => p - 1);
+      else fetchCategories();
     } catch (e) {
       setDeleteError(extractApiError(e));
     } finally {
       setDeleting(false);
     }
   };
+
+  const startIndex = (meta.page - 1) * meta.limit + 1;
+  const endIndex   = Math.min(meta.page * meta.limit, meta.total);
 
   return (
     <Box sx={{ p: { xs: 3, md: 4 } }}>
@@ -151,14 +177,15 @@ export default function AdminCategoriesPage() {
         </Button>
       </Box>
 
-      {/* Search */}
-      <Box sx={{ mb: 3 }}>
+      {/* Search + Limit */}
+      <Box sx={{ display: 'flex', gap: 2, mb: 3, flexWrap: 'wrap', alignItems: 'flex-end' }}>
         <TextField
           placeholder="Search categories…"
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
+          value={searchInput}
+          onChange={(e) => setSearchInput(e.target.value)}
+          onKeyDown={(e) => { if (e.key === 'Enter') handleSearch(); }}
           size="small"
-          sx={{ ...fieldSx, width: { xs: '100%', sm: 320 } }}
+          sx={{ ...fieldSx, width: { xs: '100%', sm: 280 } }}
           InputProps={{
             startAdornment: (
               <InputAdornment position="start">
@@ -167,6 +194,38 @@ export default function AdminCategoriesPage() {
             ),
           }}
         />
+        <Button
+          variant="outlined"
+          onClick={handleSearch}
+          sx={{ borderRadius: '8px', fontWeight: 600, borderColor: '#d1d5db', color: '#374151', '&:hover': { borderColor: NAVY, color: NAVY } }}
+        >
+          Search
+        </Button>
+        {search && (
+          <Button
+            size="small"
+            onClick={() => { setSearchInput(''); setSearch(''); setPage(1); }}
+            sx={{ color: '#9ca3af', fontSize: '0.8rem' }}
+          >
+            Clear
+          </Button>
+        )}
+
+        <Box sx={{ ml: 'auto' }}>
+          <FormControl size="small" sx={{ minWidth: 120 }}>
+            <InputLabel sx={{ '&.Mui-focused': { color: ACCENT } }}>Per page</InputLabel>
+            <Select
+              value={limit}
+              label="Per page"
+              onChange={(e) => handleLimitChange(Number(e.target.value))}
+              sx={{ borderRadius: '8px', '&.Mui-focused .MuiOutlinedInput-notchedOutline': { borderColor: ACCENT } }}
+            >
+              {LIMIT_OPTIONS.map((n) => (
+                <MenuItem key={n} value={n}>{n}</MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+        </Box>
       </Box>
 
       {error && <Alert severity="error" sx={{ mb: 2, borderRadius: '10px' }}>{error}</Alert>}
@@ -186,14 +245,14 @@ export default function AdminCategoriesPage() {
             </TableHead>
             <TableBody>
               {loading
-                ? Array.from({ length: 5 }).map((_, i) => (
+                ? Array.from({ length: limit }).map((_, i) => (
                   <TableRow key={i}>
                     {[1, 2, 3].map((j) => (
                       <TableCell key={j} sx={{ px: 2.5 }}><Skeleton height={32} /></TableCell>
                     ))}
                   </TableRow>
                 ))
-                : filtered.map((cat) => (
+                : categories.map((cat) => (
                   <TableRow
                     key={cat.id}
                     sx={{ '&:hover': { bgcolor: 'rgba(0,44,62,0.025)' }, transition: 'background 0.15s' }}
@@ -227,7 +286,7 @@ export default function AdminCategoriesPage() {
                   </TableRow>
                 ))
               }
-              {!loading && filtered.length === 0 && (
+              {!loading && categories.length === 0 && (
                 <TableRow>
                   <TableCell colSpan={3} sx={{ textAlign: 'center', py: 6, color: '#9ca3af' }}>
                     {search ? 'No categories match your search.' : 'No categories yet. Add one above.'}
@@ -238,13 +297,23 @@ export default function AdminCategoriesPage() {
           </Table>
         </TableContainer>
 
-        {!loading && (
-          <Box sx={{ px: 2.5, py: 1.5, borderTop: '1px solid rgba(0,0,0,0.07)' }}>
-            <Typography sx={{ fontSize: '0.78rem', color: '#9ca3af' }}>
-              {filtered.length} of {categories.length} categor{categories.length !== 1 ? 'ies' : 'y'}
-            </Typography>
-          </Box>
-        )}
+        {/* Footer: count + pagination */}
+        <Box sx={{ px: 2.5, py: 1.5, borderTop: '1px solid rgba(0,0,0,0.07)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 1 }}>
+          <Typography sx={{ fontSize: '0.78rem', color: '#9ca3af' }}>
+            {loading ? '…' : meta.total === 0 ? '0 categories' : `${startIndex}–${endIndex} of ${meta.total} categor${meta.total !== 1 ? 'ies' : 'y'}`}
+          </Typography>
+          {meta.totalPages > 1 && (
+            <Pagination
+              count={meta.totalPages}
+              page={page}
+              onChange={(_, p) => setPage(p)}
+              size="small"
+              sx={{
+                '& .MuiPaginationItem-root.Mui-selected': { bgcolor: ACCENT, color: '#fff', '&:hover': { bgcolor: '#e03344' } },
+              }}
+            />
+          )}
+        </Box>
       </Paper>
 
       {/* Add / Edit Dialog */}
@@ -302,7 +371,7 @@ export default function AdminCategoriesPage() {
           <Typography sx={{ color: '#374151', fontSize: '0.9rem' }}>
             Are you sure you want to delete{' '}
             <Box component="span" sx={{ fontWeight: 700, color: NAVY }}>{deleteTarget?.name}</Box>?{' '}
-            Categories with active products cannot be deleted.
+            Any products in this category will be moved to <strong>Uncategorized</strong>.
           </Typography>
         </DialogContent>
         <DialogActions sx={{ px: 3, py: 2, gap: 1 }}>
