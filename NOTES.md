@@ -62,7 +62,36 @@ Every agent-generated change was reviewed before being committed. The workflow w
 
 ## 4. Design Workflow
 
-Design decisions were made collaboratively:
+### UI/UX Design — Design Agent Process
+
+The UI was designed using **Claude Code** as the primary design agent, with **v0.dev** used for rapid component prototyping at key decision points.
+
+**How I directed the design agent:**
+
+The starting brief I gave the agent was a constraint list, not a visual description:
+- "Clean, functional storefront — not luxury, not discount. Think mid-market. Dark sidebar for admin, light card-based layout for storefront."
+- "Navigation: persistent top bar with cart icon and auth state. No hamburger menu on desktop."
+- "Product cards: image-dominant, price prominent, category pill, stock badge if low."
+
+From that, I asked the agent to propose a layout structure in prose before touching any code. I reviewed the structure (header → hero/filters → product grid → footer for storefront; sidebar nav → content area for admin) and approved it before the agent wrote any JSX.
+
+**Components prototyped in v0.dev:**
+- The product card component — I iterated twice: first pass had the category badge overlapping the image, second pass moved it below; I approved the second.
+- The admin sidebar — I requested a collapsible variant but scoped it out as a time trade-off (documented in Section 6).
+
+**Iteration on look and structure:**
+- Storefront colour palette: the agent initially proposed a neutral grey-on-white scheme. I overrode this to add an indigo accent (`indigo-600`) for primary actions and price callouts — gives the store a deliberate identity.
+- Admin panel: started with a top-nav layout, I redirected to a left sidebar (`w-64` fixed) after the first pass felt too similar to the storefront — needed a visual break to signal "you are in a different mode".
+- Typography: I specified `font-sans` (Inter via Tailwind) globally; the agent had mixed `font-mono` in some admin data tables which I caught and corrected.
+
+**What I didn't let the agent decide alone:**
+- Colour palette and accent choice — made explicit in my prompt.
+- Navigation pattern — top bar vs. sidebar split was my call, not the agent's default.
+- Spacing scale — I enforced Tailwind's default scale rather than letting the agent use arbitrary `px` values.
+
+---
+
+### Architectural Design Decisions
 
 **Schema design** — Started from the spec schema in CLAUDE.md §4 and extended it based on product requirements:
 - Added `firstName` / `lastName` / `phone` / `city` / `address` to `User` (more realistic profile)
@@ -124,3 +153,30 @@ Using the `@prisma/adapter-pg` driver adapter (Prisma 7 requirement) adds a thin
 
 **Variants stored as JSONB**
 Product variants (`{ sizes: string[], colors: string[] }`) are stored as a JSONB column rather than a separate `Variant` table with foreign keys. This keeps the schema simple at the cost of database-level filtering on variant values. For the MVP scale this is acceptable; a production catalogue would normalise variants.
+
+---
+
+## 7. Agent Session Transcripts / Logs
+
+Claude Code automatically persists a full transcript of every session to the local filesystem. The transcripts for this project are stored at:
+
+```
+~/.claude/projects/f--E-Commerce-test/
+```
+
+Each session produces a `.jsonl` file named by session ID (e.g. `df69b247-1920-4c05-89bb-4462d7c305fa.jsonl`). Each line is a JSON object representing one turn: the user prompt, the assistant reply, every tool call made (Read, Edit, Write, Bash, Grep, Glob), and the tool result. This makes it possible to replay exactly what the agent did and verify every file change was reviewed before being committed.
+
+**What the transcripts show:**
+- The sequence of prompts I used to scope each build phase — initial scaffold, auth, products, cart, orders, admin, suggestions
+- Every file the agent read before editing (confirming no blind writes)
+- Tool calls where I interrupted or redirected the agent (e.g. the Prisma 7 adapter correction, the Stripe Checkout → PaymentIntents redirect)
+- The review-then-commit cadence: agent writes file → I inspect the diff in VS Code → git add + commit
+
+**How to read them:**
+The `.jsonl` files can be opened in any text editor or parsed with `jq`. To extract all assistant messages chronologically:
+```bash
+cat ~/.claude/projects/f--E-Commerce-test/<session-id>.jsonl \
+  | jq -r 'select(.role == "assistant") | .content'
+```
+
+These logs are the ground truth for the agentic workflow described in Sections 1–3 above.
